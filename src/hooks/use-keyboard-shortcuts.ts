@@ -11,9 +11,10 @@ function isTextTarget(target: EventTarget | null): boolean {
   return false;
 }
 
-/** Wires `s` (toggle sidebar), `a` (prev file), `d` (next file). */
+/** Wires `s` (toggle sidebar), `w` (toggle TOC), `a` (prev file), `d` (next file). */
 export function useKeyboardShortcuts(): void {
   const toggleSidebar = useViewerStore((s) => s.toggleSidebar);
+  const toggleToc = useViewerStore((s) => s.toggleToc);
   const nextFile = useViewerStore((s) => s.nextFile);
   const prevFile = useViewerStore((s) => s.prevFile);
 
@@ -25,6 +26,9 @@ export function useKeyboardShortcuts(): void {
       if (k === "s") {
         e.preventDefault();
         toggleSidebar();
+      } else if (k === "w") {
+        e.preventDefault();
+        toggleToc();
       } else if (k === "d") {
         e.preventDefault();
         nextFile();
@@ -35,5 +39,5 @@ export function useKeyboardShortcuts(): void {
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [toggleSidebar, nextFile, prevFile]);
+  }, [toggleSidebar, toggleToc, nextFile, prevFile]);
 }

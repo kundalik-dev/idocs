@@ -44,7 +44,7 @@ This file is both a **task tracker** and a **demo document** — open it from th
 - [ ] Markdown content renders + Shiki highlights
 - [ ] Copy-code button writes to clipboard
 - [ ] TOC active-section scroll-spy
-- [ ] Keyboard shortcuts (`s`, `a`, `d`)
+- [ ] Keyboard shortcuts (`s`, `w`, `a`, `d`)
 - [ ] Auto-refresh on file edit (≤2s polling)
 - [ ] IndexedDB persistence across reload
 - [ ] Dark / light toggle
@@ -56,6 +56,7 @@ This file is both a **task tracker** and a **demo document** — open it from th
 | Key | Action            |
 | --- | ----------------- |
 | `s` | Toggle sidebar    |
+| `w` | Toggle TOC rail   |
 | `a` | Previous file     |
 | `d` | Next file         |
 

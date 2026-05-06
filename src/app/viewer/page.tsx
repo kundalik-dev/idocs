@@ -6,6 +6,8 @@ import {
   ArrowLeft,
   PanelLeftClose,
   PanelLeftOpen,
+  PanelRightClose,
+  PanelRightOpen,
   RefreshCw,
   Trash2,
 } from "lucide-react";
@@ -29,7 +31,9 @@ import { extractToc, parseMarkdown } from "@/lib/markdown";
 
 export default function ViewerPage() {
   const sidebarOpen = useViewerStore((s) => s.sidebarOpen);
+  const tocOpen = useViewerStore((s) => s.tocOpen);
   const toggleSidebar = useViewerStore((s) => s.toggleSidebar);
+  const toggleToc = useViewerStore((s) => s.toggleToc);
   const hydrate = useViewerStore((s) => s.hydrate);
   const hydrated = useViewerStore((s) => s.hydrated);
   const activeFile = useViewerStore(selectActiveFile);
@@ -51,6 +55,7 @@ export default function ViewerPage() {
     () => (parsed ? extractToc(parsed.content) : []),
     [parsed]
   );
+  const tocVisible = tocOpen && parsed && toc.length > 0;
 
   const onClearAll = async () => {
     await clearAll();
@@ -105,6 +110,27 @@ export default function ViewerPage() {
           <div className="hidden sm:block">
             <ShortcutHints />
           </div>
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  onClick={toggleToc}
+                  aria-label={tocOpen ? "Hide table of contents" : "Show table of contents"}
+                />
+              }
+            >
+              {tocOpen ? (
+                <PanelRightClose className="size-4" />
+              ) : (
+                <PanelRightOpen className="size-4" />
+              )}
+            </TooltipTrigger>
+            <TooltipContent>
+              Toggle TOC <kbd className="ml-1 font-mono text-[10px] opacity-80">W</kbd>
+            </TooltipContent>
+          </Tooltip>
           <ThemeToggle />
         </div>
       </header>
@@ -193,13 +219,25 @@ export default function ViewerPage() {
           </div>
 
           {/* Right TOC rail (only when content + headings) */}
-          {parsed && toc.length > 0 ? (
-            <aside className="hidden xl:flex xl:flex-col w-64 shrink-0 border-l border-border overflow-y-auto thin-scrollbar">
-              <div className="p-6">
-                <Toc items={toc} />
-              </div>
-            </aside>
-          ) : null}
+          <aside
+            aria-hidden={!tocVisible}
+            className={cn(
+              "hidden xl:flex xl:flex-col shrink-0 overflow-hidden border-l thin-scrollbar",
+              "transition-[width,border-color] duration-200 ease-out",
+              tocVisible ? "w-64 border-border" : "w-0 border-transparent"
+            )}
+          >
+            <div
+              className={cn(
+                "w-64 p-6 transition-[opacity,transform] duration-200 ease-out",
+                tocVisible
+                  ? "translate-x-0 opacity-100"
+                  : "pointer-events-none translate-x-4 opacity-0"
+              )}
+            >
+              {parsed && toc.length > 0 ? <Toc items={toc} /> : null}
+            </div>
+          </aside>
         </main>
       </div>
     </div>

@@ -9,9 +9,11 @@ import {
   loadActiveFileId,
   loadSidebarOpen,
   loadSources,
+  loadTocOpen,
   saveActiveFileId,
   saveSidebarOpen,
   saveSources,
+  saveTocOpen,
 } from "@/lib/idb";
 import {
   WalkedFile,
@@ -46,6 +48,7 @@ type State = {
   sources: ViewerSource[];
   activeFileId: string | null;
   sidebarOpen: boolean;
+  tocOpen: boolean;
   hydrated: boolean;
   hydrating: boolean;
 };
@@ -61,6 +64,8 @@ type Actions = {
   prevFile: () => void;
   toggleSidebar: () => void;
   setSidebarOpen: (open: boolean) => void;
+  toggleToc: () => void;
+  setTocOpen: (open: boolean) => void;
   requestPermissionFor: (sourceId: string) => Promise<boolean>;
   clearAll: () => Promise<void>;
 };
@@ -121,12 +126,14 @@ async function persist(state: State): Promise<void> {
   await saveSources(stored);
   await saveActiveFileId(state.activeFileId);
   await saveSidebarOpen(state.sidebarOpen);
+  await saveTocOpen(state.tocOpen);
 }
 
 export const useViewerStore = create<State & Actions>((set, get) => ({
   sources: [],
   activeFileId: null,
   sidebarOpen: true,
+  tocOpen: true,
   hydrated: false,
   hydrating: false,
 
@@ -134,10 +141,11 @@ export const useViewerStore = create<State & Actions>((set, get) => ({
     if (get().hydrated || get().hydrating) return;
     set({ hydrating: true });
     try {
-      const [stored, activeId, sidebarOpen] = await Promise.all([
+      const [stored, activeId, sidebarOpen, tocOpen] = await Promise.all([
         loadSources(),
         loadActiveFileId(),
         loadSidebarOpen(),
+        loadTocOpen(),
       ]);
 
       const sources: ViewerSource[] = [];
@@ -191,6 +199,7 @@ export const useViewerStore = create<State & Actions>((set, get) => ({
         sources,
         activeFileId: activeStillValid,
         sidebarOpen: sidebarOpen ?? true,
+        tocOpen: tocOpen ?? true,
         hydrated: true,
         hydrating: false,
       });
@@ -331,6 +340,23 @@ export const useViewerStore = create<State & Actions>((set, get) => ({
       const updated = { ...s, sidebarOpen: open };
       void persist(updated);
       return { sidebarOpen: open };
+    });
+  },
+
+  toggleToc: () => {
+    set((s) => {
+      const tocOpen = !s.tocOpen;
+      const updated = { ...s, tocOpen };
+      void persist(updated);
+      return { tocOpen };
+    });
+  },
+
+  setTocOpen: (open) => {
+    set((s) => {
+      const updated = { ...s, tocOpen: open };
+      void persist(updated);
+      return { tocOpen: open };
     });
   },
 

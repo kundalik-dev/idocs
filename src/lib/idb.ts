@@ -8,6 +8,7 @@ const store = createStore("idocs-db", "idocs-store");
 const SOURCES_KEY = "sources:v1";
 const ACTIVE_KEY = "activeFileId:v1";
 const SIDEBAR_KEY = "sidebarOpen:v1";
+const TOC_KEY = "tocOpen:v1";
 
 export type StoredSource =
   | {
@@ -54,5 +55,14 @@ export async function saveSidebarOpen(open: boolean): Promise<void> {
 
 export async function loadSidebarOpen(): Promise<boolean | null> {
   const v = await get<boolean>(SIDEBAR_KEY, store);
+  return typeof v === "boolean" ? v : null;
+}
+
+export async function saveTocOpen(open: boolean): Promise<void> {
+  await set(TOC_KEY, open, store);
+}
+
+export async function loadTocOpen(): Promise<boolean | null> {
+  const v = await get<boolean>(TOC_KEY, store);
   return typeof v === "boolean" ? v : null;
 }

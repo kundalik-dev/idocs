@@ -27,6 +27,7 @@ You can mix and match: open multiple folders and individual files at the same ti
 ## Shortcuts
 
 - `s` — toggle the sidebar
+- `w` — toggle the table of contents
 - `a` — previous file
 - `d` — next file
 

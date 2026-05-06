@@ -20,6 +20,9 @@ export function ShortcutHints() {
         <Kbd>S</Kbd> sidebar
       </span>
       <span className="inline-flex items-center gap-1.5">
+        <Kbd>W</Kbd> TOC
+      </span>
+      <span className="inline-flex items-center gap-1.5">
         <Kbd>A</Kbd>
         <Kbd>D</Kbd> prev / next
       </span>
