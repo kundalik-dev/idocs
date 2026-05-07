@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import {
   ArrowRight,
   BookOpen,
@@ -10,6 +11,15 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
+
+export const metadata: Metadata = {
+  title: "Private Local Markdown Reader",
+  description:
+    "Read Markdown files from your computer in a private, local-first browser app with folder support, table of contents, syntax highlighting, and offline-friendly document access.",
+  alternates: {
+    canonical: "/",
+  },
+};
 
 const features = [
   {
@@ -45,8 +55,35 @@ const features = [
 ];
 
 export default function Home() {
+  const productSchema = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: "iDocs",
+    applicationCategory: "ProductivityApplication",
+    operatingSystem: "Web",
+    description:
+      "A private, local-first Markdown reader that opens folders and files directly from your computer.",
+    offers: {
+      "@type": "Offer",
+      price: "0",
+      priceCurrency: "USD",
+    },
+    featureList: [
+      "Open local Markdown folders and files",
+      "Render GitHub-flavored Markdown",
+      "Generate a table of contents from headings",
+      "Highlight code blocks",
+      "Store file handles locally in the browser",
+      "Support light and dark themes",
+    ],
+  };
+
   return (
     <div className="flex flex-col flex-1">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }}
+      />
       <header className="sticky top-0 z-40 backdrop-blur-md bg-background/70 border-b border-border">
         <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight">
