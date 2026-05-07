@@ -146,8 +146,8 @@ export default function ViewerPage() {
             "overflow-hidden"
           )}
         >
-          <div className="w-72 h-full flex flex-col">
-            <div className="px-3 py-3 border-b border-sidebar-border flex items-center justify-between">
+          <div className="w-72 h-full min-h-0 flex flex-col">
+            <div className="shrink-0 px-3 py-3 border-b border-sidebar-border flex items-center justify-between">
               <span className="text-[11px] uppercase tracking-widest font-semibold text-muted-foreground">
                 Library
               </span>
@@ -173,7 +173,7 @@ export default function ViewerPage() {
                 <FilePicker variant="compact" />
               </div>
             </div>
-            <ScrollArea className="flex-1 thin-scrollbar">
+            <ScrollArea className="min-h-0 flex-1 overflow-hidden thin-scrollbar">
               {!hydrated ? (
                 <div className="p-3 space-y-2">
                   <Skeleton className="h-4 w-3/4" />
@@ -194,7 +194,7 @@ export default function ViewerPage() {
         {/* Main + TOC */}
         <main className="flex-1 min-w-0 flex">
           <div className="flex-1 min-w-0 overflow-y-auto thin-scrollbar">
-            <div className="mx-auto max-w-3xl px-6 md:px-10 py-10 md:py-16">
+            <div className="mx-auto w-full max-w-6xl px-5 sm:px-6 md:px-10 lg:px-14 py-10 md:py-16">
               {!activeFile ? (
                 <EmptyState hydrated={hydrated} hasSources={hasSources} />
               ) : loading && text === null ? (
@@ -222,7 +222,7 @@ export default function ViewerPage() {
           <aside
             aria-hidden={!tocVisible}
             className={cn(
-              "hidden xl:flex xl:flex-col shrink-0 overflow-hidden border-l thin-scrollbar",
+              "hidden xl:flex xl:flex-col shrink-0 overflow-x-hidden overflow-y-auto border-l thin-scrollbar",
               "transition-[width,border-color] duration-200 ease-out",
               tocVisible ? "w-64 border-border" : "w-0 border-transparent"
             )}
