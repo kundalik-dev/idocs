@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
@@ -20,6 +20,7 @@ import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { FilePicker } from "@/components/viewer/file-picker";
 import { FileTree } from "@/components/viewer/file-tree";
+import { ServerPanel } from "@/components/viewer/server-panel";
 import { MarkdownView } from "@/components/viewer/markdown-view";
 import { MetadataCard } from "@/components/viewer/metadata-card";
 import { Toc } from "@/components/viewer/toc";
@@ -47,8 +48,7 @@ export default function ViewerPage() {
     void hydrate();
   }, [hydrate]);
 
-  const handle = activeFile?.handle ?? null;
-  const { text, loading, error, lastModified, reload } = useFileContent(handle);
+  const { text, loading, error, lastModified, reload } = useFileContent(activeFile);
 
   const parsed = useMemo(() => (text ? parseMarkdown(text) : null), [text]);
   const toc = useMemo(
@@ -93,8 +93,8 @@ export default function ViewerPage() {
           className="flex items-center gap-2 font-semibold tracking-tight text-sm hover:text-foreground/80 transition-colors"
         >
           <ArrowLeft className="size-3.5 text-muted-foreground" />
-          <span className="inline-grid size-5 shrink-0 rounded bg-foreground text-background place-items-center text-[10px] font-bold">i</span>
-          <span>iDocs</span>
+          <span className="inline-grid size-5 shrink-0 rounded bg-foreground text-background place-items-center text-[10px] font-bold">m</span>
+          <span>mDocs</span>
         </Link>
 
         <div className="hidden md:flex items-center gap-2 text-sm text-muted-foreground ml-2 min-w-0 flex-1">
@@ -188,6 +188,7 @@ export default function ViewerPage() {
                 </div>
               )}
             </ScrollArea>
+            <ServerPanel />
           </div>
         </aside>
 

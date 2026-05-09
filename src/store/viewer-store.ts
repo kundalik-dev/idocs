@@ -1,48 +1,77 @@
 "use client";
 
-// Central app state for the viewer. Keeps in-memory model of sources + active
-// file. Mirrors persistable parts to IndexedDB on every mutation.
-
 import { create } from "zustand";
 import {
   StoredSource,
+  StoredServerSource,
   loadActiveFileId,
   loadSidebarOpen,
   loadSources,
+  loadServerSources,
+  loadServerUrl,
   loadTocOpen,
   saveActiveFileId,
   saveSidebarOpen,
   saveSources,
+  saveServerSources,
+  saveServerUrl,
   saveTocOpen,
 } from "@/lib/idb";
-import {
-  WalkedFile,
-  ensureReadPermission,
-  walkDirectory,
-} from "@/lib/fs";
+import { WalkedFile, ensureReadPermission, walkDirectory } from "@/lib/fs";
+import { ServerClient, type RepoMeta, type FileRef } from "@/lib/local-server-client";
 
-export type ViewerFile = {
-  /** globally unique: `${sourceId}::${relPath}` */
+// ─── File types ───────────────────────────────────────────────────────────────
+
+export type BrowserViewerFile = {
   id: string;
   sourceId: string;
+  sourceType: "browser-fs";
   name: string;
   relPath: string;
   dirSegments: string[];
   handle: FileSystemFileHandle;
 };
 
-export type ViewerSource = {
+export type ServerViewerFile = {
+  id: string;
+  sourceId: string;
+  sourceType: "local-server";
+  name: string;
+  relPath: string;
+  dirSegments: string[];
+  repoId: string;
+  serverUrl: string;
+};
+
+export type ViewerFile = BrowserViewerFile | ServerViewerFile;
+
+// ─── Source types ─────────────────────────────────────────────────────────────
+
+type BrowserSource = {
   id: string;
   kind: "folder" | "files";
   name: string;
-  /** for folders, present and re-walkable; for "files", absent */
   directoryHandle?: FileSystemDirectoryHandle;
-  /** for "files" sources, the original picked handles (used to re-resolve) */
   fileHandles?: FileSystemFileHandle[];
-  files: ViewerFile[];
-  /** transient permission state; "unknown" until first check */
+  files: BrowserViewerFile[];
   permission: "granted" | "prompt" | "denied" | "unknown";
 };
+
+export type LocalServerSource = {
+  id: string;
+  kind: "local-server";
+  name: string;
+  repoId: string;
+  serverUrl: string;
+  branch: string;
+  files: ServerViewerFile[];
+  permission: "granted";
+  syncing: boolean;
+};
+
+export type ViewerSource = BrowserSource | LocalServerSource;
+
+// ─── Store state & actions ────────────────────────────────────────────────────
 
 type State = {
   sources: ViewerSource[];
@@ -51,14 +80,26 @@ type State = {
   tocOpen: boolean;
   hydrated: boolean;
   hydrating: boolean;
+  serverUrl: string;
+  serverStatus: "disconnected" | "connecting" | "connected" | "error";
 };
 
 type Actions = {
   hydrate: () => Promise<void>;
+  // browser-fs
   addFolder: (handle: FileSystemDirectoryHandle) => Promise<void>;
   addFiles: (handles: FileSystemFileHandle[]) => Promise<void>;
   removeSource: (sourceId: string) => Promise<void>;
   refreshSource: (sourceId: string) => Promise<void>;
+  requestPermissionFor: (sourceId: string) => Promise<boolean>;
+  clearAll: () => Promise<void>;
+  // local-server
+  setServerUrl: (url: string) => Promise<void>;
+  setServerStatus: (status: State["serverStatus"]) => void;
+  addServerSource: (repo: RepoMeta, files: FileRef[]) => void;
+  syncServerSource: (sourceId: string) => Promise<void>;
+  removeServerSource: (sourceId: string) => Promise<void>;
+  // navigation
   setActiveFile: (fileId: string) => void;
   nextFile: () => void;
   prevFile: () => void;
@@ -66,22 +107,29 @@ type Actions = {
   setSidebarOpen: (open: boolean) => void;
   toggleToc: () => void;
   setTocOpen: (open: boolean) => void;
-  requestPermissionFor: (sourceId: string) => Promise<boolean>;
-  clearAll: () => Promise<void>;
 };
 
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+const DEFAULT_SERVER_URL = "http://127.0.0.1:4873";
+
 const flatten = (sources: ViewerSource[]): ViewerFile[] =>
-  sources.flatMap((s) => s.files);
+  sources.flatMap((s) => s.files as ViewerFile[]);
 
 const makeFolderId = () =>
   `folder-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
 const makeFilesId = () =>
   `files-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
+const makeServerId = (repoId: string) => `server-${repoId}`;
 
-function toViewerFiles(sourceId: string, walked: WalkedFile[]): ViewerFile[] {
+function toBrowserFiles(
+  sourceId: string,
+  walked: WalkedFile[]
+): BrowserViewerFile[] {
   return walked.map((w) => ({
     id: `${sourceId}::${w.relPath}`,
     sourceId,
+    sourceType: "browser-fs" as const,
     name: w.name,
     relPath: w.relPath,
     dirSegments: w.dirSegments,
@@ -92,11 +140,12 @@ function toViewerFiles(sourceId: string, walked: WalkedFile[]): ViewerFile[] {
 function fromFileHandles(
   sourceId: string,
   handles: FileSystemFileHandle[]
-): ViewerFile[] {
+): BrowserViewerFile[] {
   return handles
     .map((h) => ({
       id: `${sourceId}::${h.name}`,
       sourceId,
+      sourceType: "browser-fs" as const,
       name: h.name,
       relPath: h.name,
       dirSegments: [] as string[],
@@ -105,29 +154,62 @@ function fromFileHandles(
     .sort((a, b) => a.name.localeCompare(b.name));
 }
 
+function toServerFiles(sourceId: string, refs: FileRef[], serverUrl: string): ServerViewerFile[] {
+  return refs.map((ref) => ({
+    id: `${sourceId}::${ref.relPath}`,
+    sourceId,
+    sourceType: "local-server" as const,
+    name: ref.name,
+    relPath: ref.relPath,
+    dirSegments: ref.relPath.split("/").slice(0, -1),
+    repoId: ref.repoId,
+    serverUrl,
+  }));
+}
+
 async function persist(state: State): Promise<void> {
-  const stored: StoredSource[] = state.sources.map((s) =>
+  const browserStored: StoredSource[] = (
+    state.sources.filter((s): s is BrowserSource => s.kind !== "local-server")
+  ).map((s) =>
     s.kind === "folder"
       ? {
           id: s.id,
-          kind: "folder",
+          kind: "folder" as const,
           name: s.name,
           addedAt: Date.now(),
           directoryHandle: s.directoryHandle!,
         }
       : {
           id: s.id,
-          kind: "files",
+          kind: "files" as const,
           name: s.name,
           addedAt: Date.now(),
           fileHandles: s.fileHandles ?? [],
         }
   );
-  await saveSources(stored);
-  await saveActiveFileId(state.activeFileId);
-  await saveSidebarOpen(state.sidebarOpen);
-  await saveTocOpen(state.tocOpen);
+
+  const serverStored: StoredServerSource[] = (
+    state.sources.filter((s): s is LocalServerSource => s.kind === "local-server")
+  ).map((s) => ({
+    id: s.id,
+    kind: "local-server" as const,
+    name: s.name,
+    repoId: s.repoId,
+    serverUrl: s.serverUrl,
+    branch: s.branch,
+    addedAt: Date.now(),
+  }));
+
+  await Promise.all([
+    saveSources(browserStored),
+    saveServerSources(serverStored),
+    saveActiveFileId(state.activeFileId),
+    saveSidebarOpen(state.sidebarOpen),
+    saveTocOpen(state.tocOpen),
+  ]);
 }
+
+// ─── Store ────────────────────────────────────────────────────────────────────
 
 export const useViewerStore = create<State & Actions>((set, get) => ({
   sources: [],
@@ -136,27 +218,35 @@ export const useViewerStore = create<State & Actions>((set, get) => ({
   tocOpen: true,
   hydrated: false,
   hydrating: false,
+  serverUrl: DEFAULT_SERVER_URL,
+  serverStatus: "disconnected",
 
   hydrate: async () => {
     if (get().hydrated || get().hydrating) return;
     set({ hydrating: true });
+
     try {
-      const [stored, activeId, sidebarOpen, tocOpen] = await Promise.all([
-        loadSources(),
-        loadActiveFileId(),
-        loadSidebarOpen(),
-        loadTocOpen(),
-      ]);
+      const [stored, serverStored, savedServerUrl, activeId, sidebarOpen, tocOpen] =
+        await Promise.all([
+          loadSources(),
+          loadServerSources(),
+          loadServerUrl(),
+          loadActiveFileId(),
+          loadSidebarOpen(),
+          loadTocOpen(),
+        ]);
 
       const sources: ViewerSource[] = [];
+
+      // Restore browser-fs sources
       for (const s of stored) {
         if (s.kind === "folder") {
           const granted = await ensureReadPermission(s.directoryHandle, false);
-          let files: ViewerFile[] = [];
+          let files: BrowserViewerFile[] = [];
           if (granted) {
             try {
               const walked = await walkDirectory(s.directoryHandle);
-              files = toViewerFiles(s.id, walked);
+              files = toBrowserFiles(s.id, walked);
             } catch {
               // permission may be revoked between sessions; leave empty
             }
@@ -170,14 +260,10 @@ export const useViewerStore = create<State & Actions>((set, get) => ({
             permission: granted ? "granted" : "prompt",
           });
         } else {
-          // For files, permission is per-handle — try to resolve all.
           let allGranted = true;
           for (const fh of s.fileHandles) {
             const ok = await ensureReadPermission(fh, false);
-            if (!ok) {
-              allGranted = false;
-              break;
-            }
+            if (!ok) { allGranted = false; break; }
           }
           sources.push({
             id: s.id,
@@ -190,16 +276,42 @@ export const useViewerStore = create<State & Actions>((set, get) => ({
         }
       }
 
-      // Validate active id still exists.
+      // Restore server sources — try to re-fetch file lists
+      const serverUrl = savedServerUrl ?? DEFAULT_SERVER_URL;
+      for (const s of serverStored) {
+        let files: ServerViewerFile[] = [];
+        try {
+          const client = new ServerClient(s.serverUrl);
+          const refs = await client.listFiles(s.repoId);
+          files = toServerFiles(s.id, refs, s.serverUrl);
+        } catch {
+          // server offline — restore source with empty file list
+        }
+        sources.push({
+          id: s.id,
+          kind: "local-server",
+          name: s.name,
+          repoId: s.repoId,
+          serverUrl: s.serverUrl,
+          branch: s.branch,
+          files,
+          permission: "granted",
+          syncing: false,
+        });
+      }
+
       const all = flatten(sources);
       const activeStillValid =
-        activeId && all.some((f) => f.id === activeId) ? activeId : all[0]?.id ?? null;
+        activeId && all.some((f) => f.id === activeId)
+          ? activeId
+          : all[0]?.id ?? null;
 
       set({
         sources,
         activeFileId: activeStillValid,
         sidebarOpen: sidebarOpen ?? true,
         tocOpen: tocOpen ?? true,
+        serverUrl,
         hydrated: true,
         hydrating: false,
       });
@@ -208,11 +320,13 @@ export const useViewerStore = create<State & Actions>((set, get) => ({
     }
   },
 
+  // ─── Browser-fs actions ───────────────────────────────────────────────────
+
   addFolder: async (handle) => {
     const id = makeFolderId();
     const walked = await walkDirectory(handle);
-    const files = toViewerFiles(id, walked);
-    const next: ViewerSource = {
+    const files = toBrowserFiles(id, walked);
+    const next: BrowserSource = {
       id,
       kind: "folder",
       name: handle.name || "Folder",
@@ -222,8 +336,7 @@ export const useViewerStore = create<State & Actions>((set, get) => ({
     };
     set((s) => {
       const sources = [...s.sources, next];
-      const activeFileId =
-        s.activeFileId ?? files[0]?.id ?? null;
+      const activeFileId = s.activeFileId ?? files[0]?.id ?? null;
       const updated = { ...s, sources, activeFileId };
       void persist(updated);
       return { sources, activeFileId };
@@ -234,7 +347,7 @@ export const useViewerStore = create<State & Actions>((set, get) => ({
     if (handles.length === 0) return;
     const id = makeFilesId();
     const files = fromFileHandles(id, handles);
-    const next: ViewerSource = {
+    const next: BrowserSource = {
       id,
       kind: "files",
       name: handles.length === 1 ? handles[0].name : `${handles.length} files`,
@@ -267,27 +380,24 @@ export const useViewerStore = create<State & Actions>((set, get) => ({
 
   refreshSource: async (sourceId) => {
     const src = get().sources.find((s) => s.id === sourceId);
-    if (!src) return;
+    if (!src || src.kind === "local-server") return;
 
-    let nextFiles: ViewerFile[] = src.files;
+    let nextFiles: BrowserViewerFile[] = src.files;
     if (src.kind === "folder" && src.directoryHandle) {
       const granted = await ensureReadPermission(src.directoryHandle, true);
       if (!granted) return;
       const walked = await walkDirectory(src.directoryHandle);
-      nextFiles = toViewerFiles(src.id, walked);
+      nextFiles = toBrowserFiles(src.id, walked);
     } else if (src.kind === "files" && src.fileHandles) {
-      // Re-grant permission if needed; file lists themselves don't change.
-      for (const fh of src.fileHandles) {
-        await ensureReadPermission(fh, true);
-      }
+      for (const fh of src.fileHandles) await ensureReadPermission(fh, true);
       nextFiles = fromFileHandles(src.id, src.fileHandles);
     }
 
     set((s) => {
-      const sources = s.sources.map((src2) =>
-        src2.id === sourceId
-          ? { ...src2, files: nextFiles, permission: "granted" as const }
-          : src2
+      const sources = s.sources.map((s2) =>
+        s2.id === sourceId
+          ? { ...s2, files: nextFiles, permission: "granted" as const }
+          : s2
       );
       const allIds = new Set(flatten(sources).map((f) => f.id));
       const activeFileId =
@@ -299,6 +409,110 @@ export const useViewerStore = create<State & Actions>((set, get) => ({
       return { sources, activeFileId };
     });
   },
+
+  requestPermissionFor: async (sourceId) => {
+    const src = get().sources.find((s) => s.id === sourceId);
+    if (!src || src.kind === "local-server") return false;
+    if (src.kind === "folder" && src.directoryHandle) {
+      const ok = await ensureReadPermission(src.directoryHandle, true);
+      if (ok) await get().refreshSource(sourceId);
+      return ok;
+    }
+    if (src.kind === "files" && src.fileHandles) {
+      let allOk = true;
+      for (const fh of src.fileHandles) {
+        const ok = await ensureReadPermission(fh, true);
+        if (!ok) allOk = false;
+      }
+      if (allOk) await get().refreshSource(sourceId);
+      return allOk;
+    }
+    return false;
+  },
+
+  clearAll: async () => {
+    await saveSources([]);
+    await saveServerSources([]);
+    await saveActiveFileId(null);
+    set({ sources: [], activeFileId: null });
+  },
+
+  // ─── Local server actions ─────────────────────────────────────────────────
+
+  setServerUrl: async (url) => {
+    await saveServerUrl(url);
+    set({ serverUrl: url });
+  },
+
+  setServerStatus: (status) => set({ serverStatus: status }),
+
+  addServerSource: (repo, files) => {
+    const id = makeServerId(repo.id);
+    const serverUrl = get().serverUrl;
+    const serverFiles = toServerFiles(id, files, serverUrl);
+    const next: LocalServerSource = {
+      id,
+      kind: "local-server",
+      name: repo.name,
+      repoId: repo.id,
+      serverUrl,
+      branch: repo.branch,
+      files: serverFiles,
+      permission: "granted",
+      syncing: false,
+    };
+    set((s) => {
+      // replace if already exists (re-clone), otherwise append
+      const exists = s.sources.some((src) => src.id === id);
+      const sources = exists
+        ? s.sources.map((src) => (src.id === id ? next : src))
+        : [...s.sources, next];
+      const activeFileId = s.activeFileId ?? serverFiles[0]?.id ?? null;
+      const updated = { ...s, sources, activeFileId };
+      void persist(updated);
+      return { sources, activeFileId };
+    });
+  },
+
+  syncServerSource: async (sourceId) => {
+    const src = get().sources.find((s) => s.id === sourceId);
+    if (!src || src.kind !== "local-server") return;
+
+    set((s) => ({
+      sources: s.sources.map((s2) =>
+        s2.id === sourceId ? { ...s2, syncing: true } : s2
+      ),
+    }));
+
+    try {
+      const client = new ServerClient(src.serverUrl);
+      const updatedMeta = await client.syncRepo(src.repoId);
+      const refs = await client.listFiles(src.repoId);
+      const files = toServerFiles(sourceId, refs, src.serverUrl);
+      set((s) => {
+        const sources = s.sources.map((s2) =>
+          s2.id === sourceId
+            ? { ...s2, files, branch: updatedMeta.branch, syncing: false }
+            : s2
+        );
+        void persist({ ...s, sources });
+        return { sources };
+      });
+    } catch (e) {
+      set((s) => ({
+        sources: s.sources.map((s2) =>
+          s2.id === sourceId ? { ...s2, syncing: false } : s2
+        ),
+      }));
+      throw e;
+    }
+  },
+
+  removeServerSource: async (sourceId) => {
+    get().removeSource(sourceId);
+  },
+
+  // ─── Navigation ───────────────────────────────────────────────────────────
 
   setActiveFile: (fileId) => {
     set((s) => {
@@ -359,33 +573,9 @@ export const useViewerStore = create<State & Actions>((set, get) => ({
       return { tocOpen: open };
     });
   },
-
-  clearAll: async () => {
-    await saveSources([]);
-    await saveActiveFileId(null);
-    set({ sources: [], activeFileId: null });
-  },
-
-  requestPermissionFor: async (sourceId) => {
-    const src = get().sources.find((s) => s.id === sourceId);
-    if (!src) return false;
-    if (src.kind === "folder" && src.directoryHandle) {
-      const ok = await ensureReadPermission(src.directoryHandle, true);
-      if (ok) await get().refreshSource(sourceId);
-      return ok;
-    }
-    if (src.kind === "files" && src.fileHandles) {
-      let allOk = true;
-      for (const fh of src.fileHandles) {
-        const ok = await ensureReadPermission(fh, true);
-        if (!ok) allOk = false;
-      }
-      if (allOk) await get().refreshSource(sourceId);
-      return allOk;
-    }
-    return false;
-  },
 }));
+
+// ─── Selectors ────────────────────────────────────────────────────────────────
 
 export const selectActiveFile = (s: State): ViewerFile | null => {
   const all = flatten(s.sources);

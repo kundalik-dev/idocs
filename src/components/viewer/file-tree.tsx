@@ -1,11 +1,12 @@
-"use client";
+﻿"use client";
 
-import { ChevronRight, FileText, Folder, FolderOpen, Files, MoreHorizontal, RefreshCw, Trash2 } from "lucide-react";
+import { ChevronRight, FileText, Folder, FolderOpen, Files, Globe, MoreHorizontal, RefreshCw, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
 import {
   selectActiveFile,
   useViewerStore,
+  type LocalServerSource,
   type ViewerFile,
   type ViewerSource,
 } from "@/store/viewer-store";
@@ -129,25 +130,41 @@ function FolderItem({ node }: { node: FolderNode }) {
 
 function SourceCard({ source }: { source: ViewerSource }) {
   const refreshSource = useViewerStore((s) => s.refreshSource);
+  const syncServerSource = useViewerStore((s) => s.syncServerSource);
   const removeSource = useViewerStore((s) => s.removeSource);
   const requestPermissionFor = useViewerStore((s) => s.requestPermissionFor);
-  const [refreshing, setRefreshing] = useState(false);
+  const [browserRefreshing, setBrowserRefreshing] = useState(false);
+
+  const isServer = source.kind === "local-server";
+  const syncing = isServer && (source as LocalServerSource).syncing;
+  const refreshing = isServer ? syncing : browserRefreshing;
 
   const tree = useMemo(() => buildTree(source.files), [source.files]);
 
   const onRefresh = async () => {
-    setRefreshing(true);
-    try {
-      await refreshSource(source.id);
-      toast.success(`Refreshed “${source.name}”`);
-    } catch (e) {
-      toast.error(`Couldn't refresh: ${(e as Error).message}`);
-    } finally {
-      setRefreshing(false);
+    if (isServer) {
+      try {
+        await syncServerSource(source.id);
+        toast.success(`Synced "${source.name}"`);
+      } catch (e) {
+        toast.error(`Sync failed: ${(e as Error).message}`);
+      }
+    } else {
+      setBrowserRefreshing(true);
+      try {
+        await refreshSource(source.id);
+        toast.success(`Refreshed "${source.name}"`);
+      } catch (e) {
+        toast.error(`Couldn't refresh: ${(e as Error).message}`);
+      } finally {
+        setBrowserRefreshing(false);
+      }
     }
   };
 
-  const needsPermission = source.permission === "prompt" || source.permission === "denied";
+  const needsPermission =
+    !isServer &&
+    (source.permission === "prompt" || source.permission === "denied");
 
   return (
     <section className="px-2 py-2">
@@ -155,18 +172,25 @@ function SourceCard({ source }: { source: ViewerSource }) {
         <div className="flex items-center gap-1.5 min-w-0 flex-1">
           {source.kind === "folder" ? (
             <Folder className="size-3.5 text-muted-foreground" />
-          ) : (
+          ) : source.kind === "files" ? (
             <Files className="size-3.5 text-muted-foreground" />
+          ) : (
+            <Globe className="size-3.5 text-muted-foreground" />
           )}
           <span className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold truncate">
             {source.name}
           </span>
+          {isServer && (
+            <span className="shrink-0 text-[10px] text-muted-foreground/60">
+              {(source as LocalServerSource).branch}
+            </span>
+          )}
         </div>
         <Button
           variant="ghost"
           size="icon-xs"
           onClick={onRefresh}
-          aria-label="Refresh source"
+          aria-label={isServer ? "Sync repo" : "Refresh source"}
           className={cn(
             "text-muted-foreground hover:text-foreground",
             refreshing && "animate-spin"
@@ -189,7 +213,7 @@ function SourceCard({ source }: { source: ViewerSource }) {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem onClick={onRefresh}>
-              <RefreshCw className="size-3.5" /> Refresh
+              <RefreshCw className="size-3.5" /> {isServer ? "Sync" : "Refresh"}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem

@@ -1,7 +1,9 @@
-"use client";
+﻿"use client";
 
 import { useCallback, useEffect, useState } from "react";
 import { getLastModified, readFile } from "@/lib/fs";
+import { ServerClient } from "@/lib/local-server-client";
+import type { ViewerFile } from "@/store/viewer-store";
 
 export type FileContentState = {
   text: string | null;
@@ -14,28 +16,17 @@ export type FileContentState = {
 
 const POLL_INTERVAL_MS = 2000;
 
-/**
- * Reads the active file and quietly polls its lastModified for live reload.
- * Polling stops when the document is hidden and resumes on focus.
- *
- * State is reset during render whenever the handle changes (the standard
- * "derived-from-prop" React pattern), then the effect kicks off the read.
- */
-export function useFileContent(
-  handle: FileSystemFileHandle | null
-): FileContentState {
+export function useFileContent(file: ViewerFile | null): FileContentState {
   const [text, setText] = useState<string | null>(null);
   const [lastModified, setLastModified] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [reloadKey, setReloadKey] = useState(0);
 
-  // Reset visible state when the handle changes — render-phase setState pattern.
-  const [trackedHandle, setTrackedHandle] = useState<FileSystemFileHandle | null>(
-    handle
-  );
-  if (trackedHandle !== handle) {
-    setTrackedHandle(handle);
+  // Reset derived state when the active file changes (render-phase setState).
+  const [trackedId, setTrackedId] = useState<string | null>(file?.id ?? null);
+  if (trackedId !== (file?.id ?? null)) {
+    setTrackedId(file?.id ?? null);
     setText(null);
     setLastModified(null);
     setError(null);
@@ -43,7 +34,36 @@ export function useFileContent(
   }
 
   useEffect(() => {
-    if (!handle) return;
+    if (!file) return;
+
+    if (file.sourceType === "local-server") {
+      let cancelled = false;
+      setLoading(true);
+      setError(null);
+
+      const client = new ServerClient(file.serverUrl);
+      client
+        .readFile(file.repoId, file.relPath)
+        .then((result) => {
+          if (cancelled) return;
+          setText(result.content);
+          setLastModified(result.lastModified);
+        })
+        .catch((e: unknown) => {
+          if (cancelled) return;
+          setError(e instanceof Error ? e : new Error(String(e)));
+        })
+        .finally(() => {
+          if (!cancelled) setLoading(false);
+        });
+
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    // browser-fs: poll mtime for live reload
+    const handle = file.handle;
     let cancelled = false;
     let knownMtime: number | null = null;
     let timer: ReturnType<typeof setTimeout> | null = null;
@@ -83,7 +103,7 @@ export function useFileContent(
           await doRead(false);
         }
       } catch {
-        // permission may be revoked; user can refresh manually
+        // permission may be revoked; user can reload manually
       } finally {
         if (!cancelled) timer = setTimeout(tick, POLL_INTERVAL_MS);
       }
@@ -95,7 +115,7 @@ export function useFileContent(
       cancelled = true;
       if (timer) clearTimeout(timer);
     };
-  }, [handle, reloadKey]);
+  }, [file, reloadKey]);
 
   const reload = useCallback(() => {
     setReloadKey((k) => k + 1);
