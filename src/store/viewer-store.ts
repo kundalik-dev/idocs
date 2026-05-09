@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { create } from "zustand";
 import {
@@ -75,6 +75,7 @@ export type ViewerSource = BrowserSource | LocalServerSource;
 
 type State = {
   sources: ViewerSource[];
+  activeSourceId: string | null;
   activeFileId: string | null;
   sidebarOpen: boolean;
   tocOpen: boolean;
@@ -100,6 +101,7 @@ type Actions = {
   syncServerSource: (sourceId: string) => Promise<void>;
   removeServerSource: (sourceId: string) => Promise<void>;
   // navigation
+  setActiveSource: (sourceId: string) => void;
   setActiveFile: (fileId: string) => void;
   nextFile: () => void;
   prevFile: () => void;
@@ -213,6 +215,7 @@ async function persist(state: State): Promise<void> {
 
 export const useViewerStore = create<State & Actions>((set, get) => ({
   sources: [],
+  activeSourceId: null,
   activeFileId: null,
   sidebarOpen: true,
   tocOpen: true,
@@ -306,8 +309,14 @@ export const useViewerStore = create<State & Actions>((set, get) => ({
           ? activeId
           : all[0]?.id ?? null;
 
+      // Derive activeSourceId from the active file, or fall back to first source
+      const activeSourceFromFile = activeStillValid
+        ? sources.find((s) => s.files.some((f) => f.id === activeStillValid))?.id ?? null
+        : null;
+
       set({
         sources,
+        activeSourceId: activeSourceFromFile ?? sources[0]?.id ?? null,
         activeFileId: activeStillValid,
         sidebarOpen: sidebarOpen ?? true,
         tocOpen: tocOpen ?? true,
@@ -336,10 +345,10 @@ export const useViewerStore = create<State & Actions>((set, get) => ({
     };
     set((s) => {
       const sources = [...s.sources, next];
-      const activeFileId = s.activeFileId ?? files[0]?.id ?? null;
-      const updated = { ...s, sources, activeFileId };
+      const activeFileId = files[0]?.id ?? s.activeFileId ?? null;
+      const updated = { ...s, sources, activeSourceId: id, activeFileId };
       void persist(updated);
-      return { sources, activeFileId };
+      return { sources, activeSourceId: id, activeFileId };
     });
   },
 
@@ -357,24 +366,32 @@ export const useViewerStore = create<State & Actions>((set, get) => ({
     };
     set((s) => {
       const sources = [...s.sources, next];
-      const activeFileId = s.activeFileId ?? files[0]?.id ?? null;
-      const updated = { ...s, sources, activeFileId };
+      const activeFileId = files[0]?.id ?? s.activeFileId ?? null;
+      const updated = { ...s, sources, activeSourceId: id, activeFileId };
       void persist(updated);
-      return { sources, activeFileId };
+      return { sources, activeSourceId: id, activeFileId };
     });
   },
 
   removeSource: async (sourceId) => {
     set((s) => {
       const sources = s.sources.filter((src) => src.id !== sourceId);
-      const stillActive =
-        s.activeFileId && flatten(sources).some((f) => f.id === s.activeFileId);
-      const activeFileId = stillActive
-        ? s.activeFileId
-        : flatten(sources)[0]?.id ?? null;
-      const updated = { ...s, sources, activeFileId };
+      const removingActive = s.activeSourceId === sourceId;
+      const activeSourceId = removingActive
+        ? sources[0]?.id ?? null
+        : s.activeSourceId;
+      const activeSourceFiles = activeSourceId
+        ? flatten(sources.filter((src) => src.id === activeSourceId))
+        : [];
+      const activeFileId =
+        removingActive
+          ? activeSourceFiles[0]?.id ?? null
+          : s.activeFileId && flatten(sources).some((f) => f.id === s.activeFileId)
+            ? s.activeFileId
+            : activeSourceFiles[0]?.id ?? null;
+      const updated = { ...s, sources, activeSourceId, activeFileId };
       void persist(updated);
-      return { sources, activeFileId };
+      return { sources, activeSourceId, activeFileId };
     });
   },
 
@@ -467,10 +484,10 @@ export const useViewerStore = create<State & Actions>((set, get) => ({
       const sources = exists
         ? s.sources.map((src) => (src.id === id ? next : src))
         : [...s.sources, next];
-      const activeFileId = s.activeFileId ?? serverFiles[0]?.id ?? null;
-      const updated = { ...s, sources, activeFileId };
+      const activeFileId = serverFiles[0]?.id ?? s.activeFileId ?? null;
+      const updated = { ...s, sources, activeSourceId: id, activeFileId };
       void persist(updated);
-      return { sources, activeFileId };
+      return { sources, activeSourceId: id, activeFileId };
     });
   },
 
@@ -514,6 +531,13 @@ export const useViewerStore = create<State & Actions>((set, get) => ({
 
   // ─── Navigation ───────────────────────────────────────────────────────────
 
+  setActiveSource: (sourceId) => {
+    const src = get().sources.find((s) => s.id === sourceId);
+    if (!src) return;
+    const firstFileId = src.files[0]?.id ?? null;
+    set({ activeSourceId: sourceId, activeFileId: firstFileId });
+  },
+
   setActiveFile: (fileId) => {
     set((s) => {
       const updated = { ...s, activeFileId: fileId };
@@ -523,18 +547,22 @@ export const useViewerStore = create<State & Actions>((set, get) => ({
   },
 
   nextFile: () => {
-    const all = flatten(get().sources);
+    const { sources, activeSourceId, activeFileId } = get();
+    const src = sources.find((s) => s.id === activeSourceId);
+    const all = src ? (src.files as ViewerFile[]) : flatten(sources);
     if (all.length === 0) return;
-    const idx = all.findIndex((f) => f.id === get().activeFileId);
+    const idx = all.findIndex((f) => f.id === activeFileId);
     const nextIdx = idx === -1 ? 0 : Math.min(idx + 1, all.length - 1);
     if (idx === nextIdx) return;
     get().setActiveFile(all[nextIdx].id);
   },
 
   prevFile: () => {
-    const all = flatten(get().sources);
+    const { sources, activeSourceId, activeFileId } = get();
+    const src = sources.find((s) => s.id === activeSourceId);
+    const all = src ? (src.files as ViewerFile[]) : flatten(sources);
     if (all.length === 0) return;
-    const idx = all.findIndex((f) => f.id === get().activeFileId);
+    const idx = all.findIndex((f) => f.id === activeFileId);
     const prevIdx = idx === -1 ? 0 : Math.max(idx - 1, 0);
     if (idx === prevIdx) return;
     get().setActiveFile(all[prevIdx].id);
@@ -581,5 +609,8 @@ export const selectActiveFile = (s: State): ViewerFile | null => {
   const all = flatten(s.sources);
   return all.find((f) => f.id === s.activeFileId) ?? null;
 };
+
+export const selectActiveSource = (s: State): ViewerSource | null =>
+  s.sources.find((src) => src.id === s.activeSourceId) ?? null;
 
 export const selectAllFiles = (s: State): ViewerFile[] => flatten(s.sources);

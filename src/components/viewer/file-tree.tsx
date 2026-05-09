@@ -1,7 +1,19 @@
 ﻿"use client";
 
-import { ChevronRight, FileText, Folder, FolderOpen, Files, Globe, MoreHorizontal, RefreshCw, Trash2 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import {
+  ChevronRight,
+  ChevronsDownUp,
+  ChevronsUpDown,
+  FileText,
+  Files,
+  Folder,
+  FolderOpen,
+  Globe,
+  MoreHorizontal,
+  RefreshCw,
+  Trash2,
+} from "lucide-react";
+import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import {
   selectActiveFile,
@@ -20,10 +32,19 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 
+// ─── Collapse context ─────────────────────────────────────────────────────────
+// gen increments on each "collapse/expand all" action; open is the target state.
+// FolderItem watches gen via useEffect so nested folders all respond.
+
+type CollapseSignal = { gen: number; open: boolean };
+const CollapseContext = createContext<CollapseSignal>({ gen: 0, open: true });
+
+// ─── Tree builder ─────────────────────────────────────────────────────────────
+
 type FolderNode = {
   type: "folder";
   name: string;
-  path: string; // accumulated path (for stable key + collapse state)
+  path: string;
   children: TreeNode[];
 };
 type FileNode = { type: "file"; file: ViewerFile };
@@ -50,7 +71,6 @@ function buildTree(files: ViewerFile[]): TreeNode[] {
     level.push({ type: "file", file: f });
   }
 
-  // Sort folders first, then files; alphabetic within each.
   const sortLevel = (nodes: TreeNode[]) => {
     nodes.sort((a, b) => {
       if (a.type !== b.type) return a.type === "folder" ? -1 : 1;
@@ -63,6 +83,8 @@ function buildTree(files: ViewerFile[]): TreeNode[] {
   sortLevel(root);
   return root;
 }
+
+// ─── File item ────────────────────────────────────────────────────────────────
 
 function FileItem({ file }: { file: ViewerFile }) {
   const active = useViewerStore((s) => selectActiveFile(s)?.id === file.id);
@@ -93,8 +115,22 @@ function FileItem({ file }: { file: ViewerFile }) {
   );
 }
 
+// ─── Folder item ──────────────────────────────────────────────────────────────
+
 function FolderItem({ node }: { node: FolderNode }) {
   const [open, setOpen] = useState(true);
+  const signal = useContext(CollapseContext);
+  const prevGen = useRef(0);
+
+  // Respond to collapse/expand-all signals without overriding individual toggles.
+  useEffect(() => {
+    if (signal.gen === 0) return;
+    if (signal.gen !== prevGen.current) {
+      prevGen.current = signal.gen;
+      setOpen(signal.open);
+    }
+  }, [signal.gen, signal.open]);
+
   return (
     <div>
       <button
@@ -128,18 +164,33 @@ function FolderItem({ node }: { node: FolderNode }) {
   );
 }
 
+// ─── Source card ──────────────────────────────────────────────────────────────
+
 function SourceCard({ source }: { source: ViewerSource }) {
   const refreshSource = useViewerStore((s) => s.refreshSource);
   const syncServerSource = useViewerStore((s) => s.syncServerSource);
   const removeSource = useViewerStore((s) => s.removeSource);
   const requestPermissionFor = useViewerStore((s) => s.requestPermissionFor);
   const [browserRefreshing, setBrowserRefreshing] = useState(false);
+  const [allOpen, setAllOpen] = useState(true);
+  const [collapseSignal, setCollapseSignal] = useState<CollapseSignal>({ gen: 0, open: true });
 
   const isServer = source.kind === "local-server";
   const syncing = isServer && (source as LocalServerSource).syncing;
   const refreshing = isServer ? syncing : browserRefreshing;
 
+  const hasFolders = useMemo(
+    () => source.files.some((f) => f.dirSegments.length > 0),
+    [source.files]
+  );
+
   const tree = useMemo(() => buildTree(source.files), [source.files]);
+
+  const onToggleCollapse = () => {
+    const next = !allOpen;
+    setAllOpen(next);
+    setCollapseSignal((s) => ({ gen: s.gen + 1, open: next }));
+  };
 
   const onRefresh = async () => {
     if (isServer) {
@@ -155,7 +206,7 @@ function SourceCard({ source }: { source: ViewerSource }) {
         await refreshSource(source.id);
         toast.success(`Refreshed "${source.name}"`);
       } catch (e) {
-        toast.error(`Couldn't refresh: ${(e as Error).message}`);
+        toast.error(`Could not refresh: ${(e as Error).message}`);
       } finally {
         setBrowserRefreshing(false);
       }
@@ -186,6 +237,24 @@ function SourceCard({ source }: { source: ViewerSource }) {
             </span>
           )}
         </div>
+
+        {/* Collapse / expand all — only shown when there are folders */}
+        {hasFolders && (
+          <Button
+            variant="ghost"
+            size="icon-xs"
+            onClick={onToggleCollapse}
+            aria-label={allOpen ? "Collapse all folders" : "Expand all folders"}
+            className="text-muted-foreground hover:text-foreground"
+          >
+            {allOpen ? (
+              <ChevronsDownUp className="size-3" />
+            ) : (
+              <ChevronsUpDown className="size-3" />
+            )}
+          </Button>
+        )}
+
         <Button
           variant="ghost"
           size="icon-xs"
@@ -198,6 +267,7 @@ function SourceCard({ source }: { source: ViewerSource }) {
         >
           <RefreshCw className="size-3" />
         </Button>
+
         <DropdownMenu>
           <DropdownMenuTrigger
             render={
@@ -246,23 +316,29 @@ function SourceCard({ source }: { source: ViewerSource }) {
           No markdown files found.
         </p>
       ) : (
-        <ul className="space-y-0.5">
-          {tree.map((node, i) => (
-            <li key={node.type === "folder" ? `f:${node.path}` : `x:${node.file.id}:${i}`}>
-              {node.type === "folder" ? <FolderItem node={node} /> : <FileItem file={node.file} />}
-            </li>
-          ))}
-        </ul>
+        <CollapseContext.Provider value={collapseSignal}>
+          <ul className="space-y-0.5">
+            {tree.map((node, i) => (
+              <li key={node.type === "folder" ? `f:${node.path}` : `x:${node.file.id}:${i}`}>
+                {node.type === "folder" ? <FolderItem node={node} /> : <FileItem file={node.file} />}
+              </li>
+            ))}
+          </ul>
+        </CollapseContext.Provider>
       )}
     </section>
   );
 }
 
+// ─── File tree ────────────────────────────────────────────────────────────────
+
 export function FileTree() {
+  const activeSourceId = useViewerStore((s) => s.activeSourceId);
   const sources = useViewerStore((s) => s.sources);
   const activeFileId = useViewerStore((s) => s.activeFileId);
 
-  // Scroll the active file into view when it changes (for next/prev).
+  const activeSource = sources.find((s) => s.id === activeSourceId) ?? sources[0] ?? null;
+
   useEffect(() => {
     if (!activeFileId) return;
     const el = document.querySelector(
@@ -271,16 +347,11 @@ export function FileTree() {
     el?.scrollIntoView({ block: "nearest", behavior: "smooth" });
   }, [activeFileId]);
 
-  if (sources.length === 0) return null;
+  if (!activeSource) return null;
 
   return (
-    <div className="flex flex-col">
-      {sources.map((s, i) => (
-        <div key={s.id}>
-          {i > 0 ? <div className="h-px bg-border mx-3" /> : null}
-          <SourceCard source={s} />
-        </div>
-      ))}
+    <div>
+      <SourceCard source={activeSource} />
     </div>
   );
 }

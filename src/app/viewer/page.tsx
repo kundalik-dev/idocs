@@ -9,18 +9,22 @@ import {
   PanelRightClose,
   PanelRightOpen,
   RefreshCw,
-  Trash2,
 } from "lucide-react";
-import { toast } from "sonner";
+
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { FilePicker } from "@/components/viewer/file-picker";
 import { FileTree } from "@/components/viewer/file-tree";
 import { ServerPanel } from "@/components/viewer/server-panel";
+import { SourceSwitcher } from "@/components/viewer/source-switcher";
 import { MarkdownView } from "@/components/viewer/markdown-view";
 import { MetadataCard } from "@/components/viewer/metadata-card";
 import { Toc } from "@/components/viewer/toc";
@@ -39,7 +43,6 @@ export default function ViewerPage() {
   const hydrated = useViewerStore((s) => s.hydrated);
   const activeFile = useViewerStore(selectActiveFile);
   const sources = useViewerStore((s) => s.sources);
-  const clearAll = useViewerStore((s) => s.clearAll);
   const hasSources = sources.length > 0;
 
   useKeyboardShortcuts();
@@ -48,19 +51,15 @@ export default function ViewerPage() {
     void hydrate();
   }, [hydrate]);
 
-  const { text, loading, error, lastModified, reload } = useFileContent(activeFile);
+  const { text, loading, error, lastModified, reload } =
+    useFileContent(activeFile);
 
   const parsed = useMemo(() => (text ? parseMarkdown(text) : null), [text]);
   const toc = useMemo(
     () => (parsed ? extractToc(parsed.content) : []),
-    [parsed]
+    [parsed],
   );
   const tocVisible = tocOpen && parsed && toc.length > 0;
-
-  const onClearAll = async () => {
-    await clearAll();
-    toast.success("Library cleared");
-  };
 
   return (
     <div className="fixed inset-0 flex flex-col overflow-hidden bg-background">
@@ -84,7 +83,8 @@ export default function ViewerPage() {
             )}
           </TooltipTrigger>
           <TooltipContent>
-            Toggle sidebar <kbd className="ml-1 font-mono text-[10px] opacity-80">S</kbd>
+            Toggle sidebar{" "}
+            <kbd className="ml-1 font-mono text-[10px] opacity-80">S</kbd>
           </TooltipContent>
         </Tooltip>
 
@@ -93,8 +93,10 @@ export default function ViewerPage() {
           className="flex items-center gap-2 font-semibold tracking-tight text-sm hover:text-foreground/80 transition-colors"
         >
           <ArrowLeft className="size-3.5 text-muted-foreground" />
-          <span className="inline-grid size-5 shrink-0 rounded bg-foreground text-background place-items-center text-[10px] font-bold">m</span>
-          <span>mDocs</span>
+          <span className="inline-grid size-5 shrink-0 rounded bg-foreground text-background place-items-center text-[10px] font-bold">
+            i
+          </span>
+          <span>iDocs</span>
         </Link>
 
         <div className="hidden md:flex items-center gap-2 text-sm text-muted-foreground ml-2 min-w-0 flex-1">
@@ -117,7 +119,11 @@ export default function ViewerPage() {
                   variant="ghost"
                   size="icon-sm"
                   onClick={toggleToc}
-                  aria-label={tocOpen ? "Hide table of contents" : "Show table of contents"}
+                  aria-label={
+                    tocOpen
+                      ? "Hide table of contents"
+                      : "Show table of contents"
+                  }
                 />
               }
             >
@@ -128,7 +134,8 @@ export default function ViewerPage() {
               )}
             </TooltipTrigger>
             <TooltipContent>
-              Toggle TOC <kbd className="ml-1 font-mono text-[10px] opacity-80">W</kbd>
+              Toggle TOC{" "}
+              <kbd className="ml-1 font-mono text-[10px] opacity-80">W</kbd>
             </TooltipContent>
           </Tooltip>
           <ThemeToggle />
@@ -143,35 +150,21 @@ export default function ViewerPage() {
             "shrink-0 border-r border-sidebar-border bg-sidebar text-sidebar-foreground",
             "transition-[width] duration-200 ease-out",
             sidebarOpen ? "w-72" : "w-0",
-            "overflow-hidden"
+            "overflow-hidden",
           )}
         >
           <div className="w-72 h-full min-h-0 flex flex-col">
-            <div className="shrink-0 px-3 py-3 border-b border-sidebar-border flex items-center justify-between">
-              <span className="text-[11px] uppercase tracking-widest font-semibold text-muted-foreground">
-                Library
-              </span>
-              <div className="flex items-center gap-1">
-                {hasSources && (
-                  <Tooltip>
-                    <TooltipTrigger
-                      render={
-                        <Button
-                          variant="ghost"
-                          size="icon-xs"
-                          onClick={onClearAll}
-                          aria-label="Clear all sources"
-                          className="text-muted-foreground hover:text-destructive"
-                        />
-                      }
-                    >
-                      <Trash2 className="size-3.5" />
-                    </TooltipTrigger>
-                    <TooltipContent>Clear all</TooltipContent>
-                  </Tooltip>
-                )}
-                <FilePicker variant="compact" />
-              </div>
+            {/* Project switcher */}
+            <div className="shrink-0 border-b border-sidebar-border">
+              {hasSources ? (
+                <SourceSwitcher />
+              ) : (
+                <div className="px-3 py-3">
+                  <span className="text-[11px] uppercase tracking-widest font-semibold text-muted-foreground">
+                    Library
+                  </span>
+                </div>
+              )}
             </div>
             <ScrollArea className="min-h-0 flex-1 overflow-hidden thin-scrollbar">
               {!hydrated ? (
@@ -205,12 +198,17 @@ export default function ViewerPage() {
               ) : parsed ? (
                 <>
                   <div className="flex items-center gap-3 mb-4 text-xs text-muted-foreground">
-                    <RefreshDot lastModified={lastModified} onClick={reload} loading={loading} />
+                    <RefreshDot
+                      lastModified={lastModified}
+                      onClick={reload}
+                      loading={loading}
+                    />
                   </div>
                   <MetadataCard
                     frontmatter={parsed.frontmatter}
                     fallbackTitle={
-                      activeFile.name.replace(/\.(md|markdown|mdx)$/i, "") || activeFile.name
+                      activeFile.name.replace(/\.(md|markdown|mdx)$/i, "") ||
+                      activeFile.name
                     }
                   />
                   <MarkdownView source={parsed.content} />
@@ -225,7 +223,7 @@ export default function ViewerPage() {
             className={cn(
               "hidden xl:flex xl:flex-col shrink-0 overflow-x-hidden overflow-y-auto border-l thin-scrollbar",
               "transition-[width,border-color] duration-200 ease-out",
-              tocVisible ? "w-64 border-border" : "w-0 border-transparent"
+              tocVisible ? "w-64 border-border" : "w-0 border-transparent",
             )}
           >
             <div
@@ -233,7 +231,7 @@ export default function ViewerPage() {
                 "w-64 p-6 transition-[opacity,transform] duration-200 ease-out",
                 tocVisible
                   ? "translate-x-0 opacity-100"
-                  : "pointer-events-none translate-x-4 opacity-0"
+                  : "pointer-events-none translate-x-4 opacity-0",
               )}
             >
               {parsed && toc.length > 0 ? <Toc items={toc} /> : null}
@@ -327,17 +325,32 @@ function LoadingDoc() {
   );
 }
 
-function EmptyState({ hydrated, hasSources }: { hydrated: boolean; hasSources: boolean }) {
+function EmptyState({
+  hydrated,
+  hasSources,
+}: {
+  hydrated: boolean;
+  hasSources: boolean;
+}) {
   if (!hydrated) return <LoadingDoc />;
   return (
     <div className="min-h-[60vh] grid place-items-center text-center">
       <div className="max-w-md">
         {hasSources ? (
           <>
-            <h2 className="text-2xl font-semibold tracking-tight">Pick a file from the sidebar</h2>
+            <h2 className="text-2xl font-semibold tracking-tight">
+              Pick a file from the sidebar
+            </h2>
             <p className="mt-2 text-muted-foreground text-sm">
-              Press <kbd className="font-mono text-xs px-1.5 py-0.5 rounded bg-muted border border-border">d</kbd> to jump to the next file or
-              <kbd className="font-mono text-xs px-1.5 py-0.5 rounded bg-muted border border-border ml-1">a</kbd> for the previous.
+              Press{" "}
+              <kbd className="font-mono text-xs px-1.5 py-0.5 rounded bg-muted border border-border">
+                d
+              </kbd>{" "}
+              to jump to the next file or
+              <kbd className="font-mono text-xs px-1.5 py-0.5 rounded bg-muted border border-border ml-1">
+                a
+              </kbd>{" "}
+              for the previous.
             </p>
           </>
         ) : (
@@ -348,10 +361,18 @@ function EmptyState({ hydrated, hasSources }: { hydrated: boolean; hasSources: b
   );
 }
 
-function ErrorState({ message, onRetry }: { message: string; onRetry: () => void }) {
+function ErrorState({
+  message,
+  onRetry,
+}: {
+  message: string;
+  onRetry: () => void;
+}) {
   return (
     <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-6">
-      <h2 className="text-lg font-semibold text-destructive">Couldn&apos;t read this file</h2>
+      <h2 className="text-lg font-semibold text-destructive">
+        Couldn&apos;t read this file
+      </h2>
       <p className="mt-2 text-sm text-muted-foreground">{message}</p>
       <Button variant="outline" size="sm" className="mt-4" onClick={onRetry}>
         <RefreshCw className="size-3.5" /> Try again
