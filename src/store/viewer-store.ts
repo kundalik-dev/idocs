@@ -413,7 +413,7 @@ export const useViewerStore = create<State & Actions>((set, get) => ({
     set((s) => {
       const sources = s.sources.map((s2) =>
         s2.id === sourceId
-          ? { ...s2, files: nextFiles, permission: "granted" as const }
+          ? ({ ...s2, files: nextFiles, permission: "granted" as const } as BrowserSource)
           : s2
       );
       const allIds = new Set(flatten(sources).map((f) => f.id));
@@ -509,7 +509,7 @@ export const useViewerStore = create<State & Actions>((set, get) => ({
       set((s) => {
         const sources = s.sources.map((s2) =>
           s2.id === sourceId
-            ? { ...s2, files, branch: updatedMeta.branch, syncing: false }
+            ? ({ ...s2, files, branch: updatedMeta.branch, syncing: false } as LocalServerSource)
             : s2
         );
         void persist({ ...s, sources });

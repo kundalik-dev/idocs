@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(pnpm -v)",
-      "Bash(pnpm create *)"
+      "Bash(pnpm create *)",
+      "Bash(pnpm build *)"
     ]
   }
 }
