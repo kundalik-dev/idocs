@@ -1,4 +1,4 @@
-// Typed HTTP client for the mDocs local server (http://127.0.0.1:4873).
+// Typed HTTP client for the mDocs local server (http://127.0.0.1:5540).
 // Types are defined locally — do not import from @mdocs/server (Node.js package).
 
 export interface RepoMeta {

@@ -286,7 +286,7 @@ export default function Home() {
                       Run the mDocs server locally, then clone public GitHub
                       repos from the viewer. It binds to{" "}
                       <code className="font-mono text-xs px-1 py-0.5 rounded bg-muted border border-border">
-                        127.0.0.1:4873
+                        127.0.0.1:5540
                       </code>{" "}
                       so docs stay on your machine.
                     </p>
@@ -301,8 +301,8 @@ export default function Home() {
                       Install once, then start with the short command.
                     </p>
                     <CopyCommand
-                      label="Install global"
-                      command="npm install -g mdocs"
+                      label="Install package"
+                      command="npm i @iprep/mdocs"
                       className="w-full"
                     />
                     <CopyCommand
@@ -317,7 +317,7 @@ export default function Home() {
                     </p>
                     <CopyCommand
                       label="No install"
-                      command="npx mdocs serve"
+                      command="npx @iprep/mdocs start"
                       className="w-full"
                     />
                   </div>
@@ -387,7 +387,7 @@ export default function Home() {
               Open mDocs
               <ArrowRight className="size-4" />
             </Button>
-            <CopyCommand command="npx mdocs serve" />
+            <CopyCommand command="npx @iprep/mdocs start" />
           </div>
         </section>
       </main>

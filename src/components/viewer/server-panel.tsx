@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import {
   Check,
   ChevronDown,
@@ -21,7 +21,15 @@ import { useViewerStore, type LocalServerSource } from "@/store/viewer-store";
 const GITHUB_RE =
   /^https:\/\/github\.com\/[\w.-]+\/[\w.-]+(\.git)?(\/.*)?$/i;
 
-const SERVER_COMMAND = "npx mdocs serve";
+const GLOBAL_SERVER_COMMAND = "mdocs start";
+const NPX_SERVER_COMMAND = "npx @iprep/mdocs start";
+const SERVER_COMMAND_PREF_KEY = "mdocs:server-command:v1";
+
+type ServerCommandMode = "global" | "npx";
+
+function isServerCommandMode(value: string | null): value is ServerCommandMode {
+  return value === "global" || value === "npx";
+}
 
 export function ServerPanel() {
   const serverUrl = useViewerStore((s) => s.serverUrl);
@@ -40,9 +48,13 @@ export function ServerPanel() {
   const [cloneBranch, setCloneBranch] = useState("");
   const [cloneError, setCloneError] = useState<string | null>(null);
   const [cloning, setCloning] = useState(false);
+  const [serverCommandMode, setServerCommandMode] =
+    useState<ServerCommandMode>("npx");
   const urlInputRef = useRef<HTMLInputElement>(null);
 
   const connected = serverStatus === "connected";
+  const serverCommand =
+    serverCommandMode === "global" ? GLOBAL_SERVER_COMMAND : NPX_SERVER_COMMAND;
 
   const addedRepoIds = new Set(
     sources
@@ -78,6 +90,16 @@ export function ServerPanel() {
       clearInterval(id);
     };
   }, [serverUrl, setServerStatus]);
+
+  useEffect(() => {
+    const saved = window.localStorage.getItem(SERVER_COMMAND_PREF_KEY);
+    if (isServerCommandMode(saved)) setServerCommandMode(saved);
+  }, []);
+
+  const selectServerCommandMode = (mode: ServerCommandMode) => {
+    setServerCommandMode(mode);
+    window.localStorage.setItem(SERVER_COMMAND_PREF_KEY, mode);
+  };
 
   const applyUrl = async () => {
     const trimmed = urlDraft.trim().replace(/\/$/, "");
@@ -186,7 +208,7 @@ export function ServerPanel() {
                   }
                 }}
                 className="h-7 flex-1 rounded-md border border-input bg-background px-2 text-xs outline-none focus:ring-1 focus:ring-ring"
-                placeholder="http://127.0.0.1:4873"
+                placeholder="http://127.0.0.1:5540"
                 autoFocus
               />
               <Button
@@ -225,9 +247,29 @@ export function ServerPanel() {
 
           {/* ── Offline hint ── */}
           {serverStatus === "error" && (
-            <p className="text-[11px] text-muted-foreground leading-snug">
-              Can&apos;t reach the server. Run <InlineCopyCommand command={SERVER_COMMAND} />.
-            </p>
+            <div className="space-y-1.5">
+              <p className="text-[11px] text-muted-foreground leading-snug">
+                Can&apos;t reach the server. Run{" "}
+                <InlineCopyCommand command={serverCommand} />.
+              </p>
+              <div
+                className="inline-flex rounded-md border border-sidebar-border bg-sidebar-accent/30 p-0.5"
+                aria-label="Server command type"
+              >
+                <CommandModeButton
+                  active={serverCommandMode === "global"}
+                  onClick={() => selectServerCommandMode("global")}
+                >
+                  Installed
+                </CommandModeButton>
+                <CommandModeButton
+                  active={serverCommandMode === "npx"}
+                  onClick={() => selectServerCommandMode("npx")}
+                >
+                  npx
+                </CommandModeButton>
+              </div>
+            </div>
           )}
 
           {/* ── Clone form + repo list (shown when connected) ── */}
@@ -341,6 +383,31 @@ export function ServerPanel() {
         </div>
       )}
     </div>
+  );
+}
+
+function CommandModeButton({
+  active,
+  children,
+  onClick,
+}: {
+  active: boolean;
+  children: ReactNode;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        "h-5 rounded px-1.5 text-[10px] font-medium transition-colors",
+        active
+          ? "bg-background text-foreground shadow-sm"
+          : "text-muted-foreground hover:text-foreground"
+      )}
+    >
+      {children}
+    </button>
   );
 }
 

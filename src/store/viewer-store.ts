@@ -133,7 +133,12 @@ type Actions = {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-const DEFAULT_SERVER_URL = "http://127.0.0.1:4873";
+const LEGACY_SERVER_URL = "http://127.0.0.1:4873";
+const DEFAULT_SERVER_URL = "http://127.0.0.1:5540";
+
+function normalizeServerUrl(url: string | null): string {
+  return url === LEGACY_SERVER_URL || url === null ? DEFAULT_SERVER_URL : url;
+}
 
 const DEMO_DOCS: Record<
   string,
@@ -314,22 +319,26 @@ export const useViewerStore = create<State & Actions>((set, get) => ({
       }
 
       // Restore server sources — try to re-fetch file lists
-      const serverUrl = savedServerUrl ?? DEFAULT_SERVER_URL;
+      const serverUrl = normalizeServerUrl(savedServerUrl);
+      const restoredServerSources: StoredServerSource[] = [];
+
       for (const s of serverStored) {
+        const sourceServerUrl = normalizeServerUrl(s.serverUrl);
         let files: ServerViewerFile[] = [];
         try {
-          const client = new ServerClient(s.serverUrl);
+          const client = new ServerClient(sourceServerUrl);
           const refs = await client.listFiles(s.repoId);
-          files = toServerFiles(s.id, refs, s.serverUrl);
+          files = toServerFiles(s.id, refs, sourceServerUrl);
         } catch {
           // server offline — restore source with empty file list
         }
+        restoredServerSources.push({ ...s, serverUrl: sourceServerUrl });
         sources.push({
           id: s.id,
           kind: "local-server",
           name: s.name,
           repoId: s.repoId,
-          serverUrl: s.serverUrl,
+          serverUrl: sourceServerUrl,
           branch: s.branch,
           files,
           permission: "granted",
@@ -358,6 +367,13 @@ export const useViewerStore = create<State & Actions>((set, get) => ({
         hydrated: true,
         hydrating: false,
       });
+
+      if (savedServerUrl !== serverUrl) {
+        await saveServerUrl(serverUrl);
+      }
+      if (restoredServerSources.some((s, i) => s.serverUrl !== serverStored[i]?.serverUrl)) {
+        await saveServerSources(restoredServerSources);
+      }
     } catch {
       set({ hydrated: true, hydrating: false });
     }

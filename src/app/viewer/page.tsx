@@ -111,9 +111,9 @@ function ViewerPageContent() {
         >
           <ArrowLeft className="size-3.5 text-muted-foreground" />
           <span className="inline-grid size-5 shrink-0 rounded bg-foreground text-background place-items-center text-[10px] font-bold">
-            i
+            m
           </span>
-          <span>iDocs</span>
+          <span>mDocs</span>
         </Link>
 
         <div className="hidden md:flex items-center gap-2 text-sm text-muted-foreground ml-2 min-w-0 flex-1">
