@@ -8,7 +8,11 @@ function getNativeButtonProp(
     return nativeButton
   }
 
-  return React.isValidElement(render) && render.type === "button"
+  if (React.isValidElement(render) && typeof render.type === "string") {
+    return render.type === "button"
+  }
+
+  return undefined
 }
 
 export { getNativeButtonProp }

@@ -36,6 +36,36 @@ export function useFileContent(file: ViewerFile | null): FileContentState {
   useEffect(() => {
     if (!file) return;
 
+    if (file.sourceType === "demo-doc") {
+      let cancelled = false;
+      setLoading(true);
+      setError(null);
+
+      fetch(file.publicPath)
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error(`Demo document not found (${response.status})`);
+          }
+          return response.text();
+        })
+        .then((content) => {
+          if (cancelled) return;
+          setText(content);
+          setLastModified(Date.now());
+        })
+        .catch((e: unknown) => {
+          if (cancelled) return;
+          setError(e instanceof Error ? e : new Error(String(e)));
+        })
+        .finally(() => {
+          if (!cancelled) setLoading(false);
+        });
+
+      return () => {
+        cancelled = true;
+      };
+    }
+
     if (file.sourceType === "local-server") {
       let cancelled = false;
       setLoading(true);

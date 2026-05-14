@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { Check, ChevronDown, Files, FolderOpen, Globe, Folder, Plus, Trash2 } from "lucide-react";
+import { BookOpen, Check, ChevronDown, Files, FolderOpen, Globe, Folder, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import {
@@ -20,11 +20,13 @@ import {
 function SourceIcon({ source, className }: { source: ViewerSource; className?: string }) {
   if (source.kind === "folder") return <Folder className={cn("shrink-0", className)} />;
   if (source.kind === "files") return <Files className={cn("shrink-0", className)} />;
+  if (source.kind === "demo") return <BookOpen className={cn("shrink-0", className)} />;
   return <Globe className={cn("shrink-0", className)} />;
 }
 
 function sourceSublabel(source: ViewerSource): string {
   if (source.kind === "local-server") return source.branch;
+  if (source.kind === "demo") return "demo guide";
   if (source.kind === "folder") return "folder";
   return `${source.files.length} file${source.files.length === 1 ? "" : "s"}`;
 }

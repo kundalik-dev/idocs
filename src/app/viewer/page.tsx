@@ -1,6 +1,7 @@
 ﻿"use client";
 
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import {
   ArrowLeft,
@@ -35,12 +36,14 @@ import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
 import { extractToc, parseMarkdown } from "@/lib/markdown";
 
 export default function ViewerPage() {
+  const searchParams = useSearchParams();
   const sidebarOpen = useViewerStore((s) => s.sidebarOpen);
   const tocOpen = useViewerStore((s) => s.tocOpen);
   const toggleSidebar = useViewerStore((s) => s.toggleSidebar);
   const toggleToc = useViewerStore((s) => s.toggleToc);
   const hydrate = useViewerStore((s) => s.hydrate);
   const hydrated = useViewerStore((s) => s.hydrated);
+  const openDemoDoc = useViewerStore((s) => s.openDemoDoc);
   const activeFile = useViewerStore(selectActiveFile);
   const sources = useViewerStore((s) => s.sources);
   const hasSources = sources.length > 0;
@@ -50,6 +53,12 @@ export default function ViewerPage() {
   useEffect(() => {
     void hydrate();
   }, [hydrate]);
+
+  useEffect(() => {
+    if (!hydrated) return;
+    const demo = searchParams.get("demo");
+    if (demo) openDemoDoc(demo);
+  }, [hydrated, openDemoDoc, searchParams]);
 
   const { text, loading, error, lastModified, reload } =
     useFileContent(activeFile);

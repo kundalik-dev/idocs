@@ -43,7 +43,17 @@ export type ServerViewerFile = {
   serverUrl: string;
 };
 
-export type ViewerFile = BrowserViewerFile | ServerViewerFile;
+export type DemoViewerFile = {
+  id: string;
+  sourceId: string;
+  sourceType: "demo-doc";
+  name: string;
+  relPath: string;
+  dirSegments: string[];
+  publicPath: string;
+};
+
+export type ViewerFile = BrowserViewerFile | ServerViewerFile | DemoViewerFile;
 
 // ─── Source types ─────────────────────────────────────────────────────────────
 
@@ -69,7 +79,15 @@ export type LocalServerSource = {
   syncing: boolean;
 };
 
-export type ViewerSource = BrowserSource | LocalServerSource;
+export type DemoSource = {
+  id: string;
+  kind: "demo";
+  name: string;
+  files: DemoViewerFile[];
+  permission: "granted";
+};
+
+export type ViewerSource = BrowserSource | LocalServerSource | DemoSource;
 
 // ─── Store state & actions ────────────────────────────────────────────────────
 
@@ -100,6 +118,8 @@ type Actions = {
   addServerSource: (repo: RepoMeta, files: FileRef[]) => void;
   syncServerSource: (sourceId: string) => Promise<void>;
   removeServerSource: (sourceId: string) => Promise<void>;
+  // demo docs
+  openDemoDoc: (slug: string) => void;
   // navigation
   setActiveSource: (sourceId: string) => void;
   setActiveFile: (fileId: string) => void;
@@ -114,6 +134,18 @@ type Actions = {
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 const DEFAULT_SERVER_URL = "http://127.0.0.1:4873";
+
+const DEMO_DOCS: Record<
+  string,
+  { sourceName: string; fileName: string; relPath: string; publicPath: string }
+> = {
+  "mdocs-info": {
+    sourceName: "mDocs Demo",
+    fileName: "mdocs-info.md",
+    relPath: "mdocs-info.md",
+    publicPath: "/docs/mdocs-info.md",
+  },
+};
 
 const flatten = (sources: ViewerSource[]): ViewerFile[] =>
   sources.flatMap((s) => s.files as ViewerFile[]);
@@ -171,7 +203,9 @@ function toServerFiles(sourceId: string, refs: FileRef[], serverUrl: string): Se
 
 async function persist(state: State): Promise<void> {
   const browserStored: StoredSource[] = (
-    state.sources.filter((s): s is BrowserSource => s.kind !== "local-server")
+    state.sources.filter(
+      (s): s is BrowserSource => s.kind === "folder" || s.kind === "files"
+    )
   ).map((s) =>
     s.kind === "folder"
       ? {
@@ -451,7 +485,7 @@ export const useViewerStore = create<State & Actions>((set, get) => ({
     await saveSources([]);
     await saveServerSources([]);
     await saveActiveFileId(null);
-    set({ sources: [], activeFileId: null });
+    set({ sources: [], activeSourceId: null, activeFileId: null });
   },
 
   // ─── Local server actions ─────────────────────────────────────────────────
@@ -527,6 +561,45 @@ export const useViewerStore = create<State & Actions>((set, get) => ({
 
   removeServerSource: async (sourceId) => {
     get().removeSource(sourceId);
+  },
+
+  // ─── Demo docs ────────────────────────────────────────────────────────────
+
+  openDemoDoc: (slug) => {
+    const doc = DEMO_DOCS[slug];
+    if (!doc) return;
+
+    const sourceId = `demo-${slug}`;
+    const fileId = `${sourceId}::${doc.relPath}`;
+    const file: DemoViewerFile = {
+      id: fileId,
+      sourceId,
+      sourceType: "demo-doc",
+      name: doc.fileName,
+      relPath: doc.relPath,
+      dirSegments: [],
+      publicPath: doc.publicPath,
+    };
+    const next: DemoSource = {
+      id: sourceId,
+      kind: "demo",
+      name: doc.sourceName,
+      files: [file],
+      permission: "granted",
+    };
+
+    set((s) => {
+      const exists = s.sources.some((src) => src.id === sourceId);
+      const sources = exists
+        ? s.sources.map((src) => (src.id === sourceId ? next : src))
+        : [next, ...s.sources];
+
+      return {
+        sources,
+        activeSourceId: sourceId,
+        activeFileId: fileId,
+      };
+    });
   },
 
   // ─── Navigation ───────────────────────────────────────────────────────────

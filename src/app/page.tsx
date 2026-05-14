@@ -110,7 +110,10 @@ export default function Home() {
       {/* ── Header ── */}
       <header className="sticky top-0 z-40 backdrop-blur-md bg-background/70 border-b border-border">
         <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight">
+          <Link
+            href="/"
+            className="flex items-center gap-2 font-semibold tracking-tight"
+          >
             <span className="inline-grid size-6 shrink-0 rounded-md bg-foreground text-background place-items-center text-xs font-bold">
               m
             </span>
@@ -118,8 +121,12 @@ export default function Home() {
           </Link>
           <div className="flex items-center gap-2">
             <ThemeToggle />
-            <Button variant="default" size="sm" render={<Link href="/viewer" />}>
-              Open viewer
+            <Button
+              variant="default"
+              size="sm"
+              render={<Link href="/viewer" />}
+            >
+              Open mDocs
               <ArrowRight className="size-4" />
             </Button>
           </div>
@@ -127,7 +134,6 @@ export default function Home() {
       </header>
 
       <main className="flex-1">
-
         {/* ── Hero ── */}
         <section className="max-w-6xl mx-auto px-6 pt-24 pb-20 md:pt-32 md:pb-28">
           <div className="max-w-3xl">
@@ -136,35 +142,40 @@ export default function Home() {
               Local-first &middot; No upload &middot; Works offline
             </span>
             <h1 className="mt-6 text-5xl md:text-6xl font-bold tracking-tight leading-[1.05]">
-              Your markdown library,
+              Your markdown viewer,
               <br />
               <span className="text-muted-foreground">read beautifully.</span>
             </h1>
             <p className="mt-6 text-lg md:text-xl text-muted-foreground leading-relaxed max-w-2xl">
-              mDocs opens{" "}
+              mDocs open folders, individual{" "}
               <code className="font-mono text-sm px-1.5 py-0.5 rounded bg-muted border border-border">
                 .md
               </code>{" "}
-              files straight from your machine — or connects to a local server to
-              browse cloned GitHub repos. Pick a folder, clone a repo, then read
-              with syntax-highlighted code and a table of contents that follows you
-              down the page.
+              or cloned GitHub repos in a private reader with syntax
+              highlighting, live reload, and a table of contents.
             </p>
             <div className="mt-10 flex flex-wrap items-center gap-3">
-              <Button size="lg" render={<Link href="/viewer" />}>
-                Open the viewer
+              <Button
+                size="lg"
+                nativeButton={false}
+                render={<Link href="/viewer" />}
+              >
+                Open mDocs
                 <ArrowRight className="size-4" />
               </Button>
               <Button
                 size="lg"
                 variant="outline"
-                render={<a href="/docs/PROGRESS.md" target="_blank" rel="noreferrer" />}
+                nativeButton={false}
+                render={<Link href="/viewer?demo=mdocs-info" />}
               >
-                Peek at the demo doc
+                View demo in mDocs
+                <BookOpen className="size-4" />
               </Button>
             </div>
             <p className="mt-6 text-xs text-muted-foreground">
-              Local file picking requires a Chromium browser (Chrome, Edge, Brave, Arc).
+              Local file picking requires a Chromium browser (Chrome, Edge,
+              Brave, Arc).
             </p>
           </div>
         </section>
@@ -176,7 +187,6 @@ export default function Home() {
               Two ways to open docs
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
               {/* Browser files */}
               <div className="rounded-xl border border-border bg-muted/20 p-7 flex flex-col gap-4">
                 <div className="size-10 rounded-lg bg-foreground text-background flex items-center justify-center">
@@ -185,8 +195,8 @@ export default function Home() {
                 <div>
                   <h3 className="font-semibold text-lg">Browser files</h3>
                   <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-                    Use the File System Access API to open a local folder or pick
-                    individual files. No install required — just click{" "}
+                    Use the File System Access API to open a local folder or
+                    pick individual files. No install required — just click{" "}
                     <strong>Open viewer</strong> above and pick your folder.
                   </p>
                 </div>
@@ -212,7 +222,9 @@ export default function Home() {
                   <Terminal className="size-4.5" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-lg">Local server + GitHub repos</h3>
+                  <h3 className="font-semibold text-lg">
+                    Local server + GitHub repos
+                  </h3>
                   <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
                     Run the mDocs server locally, then clone any public GitHub
                     repo straight from the viewer. The server lives at{" "}
@@ -244,7 +256,6 @@ export default function Home() {
                   </ul>
                 </div>
               </div>
-
             </div>
           </div>
         </section>
@@ -262,7 +273,9 @@ export default function Home() {
                     <Icon className="size-4" />
                   </div>
                   <h3 className="font-semibold text-base">{title}</h3>
-                  <p className="mt-1.5 text-sm text-muted-foreground leading-relaxed">{body}</p>
+                  <p className="mt-1.5 text-sm text-muted-foreground leading-relaxed">
+                    {body}
+                  </p>
                 </div>
               ))}
             </div>
@@ -276,26 +289,35 @@ export default function Home() {
           </h2>
           <p className="mt-4 text-muted-foreground leading-relaxed">
             mDocs reads files via the File System Access API and a local server
-            that binds to <code className="font-mono text-sm px-1.5 py-0.5 rounded bg-muted border border-border">127.0.0.1</code> only.
-            Your documents are never uploaded anywhere. File handles are remembered
-            locally so you don&apos;t have to re-pick on every visit.
+            that binds to{" "}
+            <code className="font-mono text-sm px-1.5 py-0.5 rounded bg-muted border border-border">
+              127.0.0.1
+            </code>{" "}
+            only. Your documents are never uploaded anywhere. File handles are
+            remembered locally so you don&apos;t have to re-pick on every visit.
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
-            <Button size="lg" render={<Link href="/viewer" />}>
-              Open the viewer
+            <Button
+              size="lg"
+              nativeButton={false}
+              render={<Link href="/viewer" />}
+            >
+              Open mDocs
               <ArrowRight className="size-4" />
             </Button>
             <CopyCommand command="npx mdocs serve" />
           </div>
         </section>
-
       </main>
 
       {/* ── Footer ── */}
       <footer className="border-t border-border">
         <div className="max-w-6xl mx-auto px-6 py-6 text-xs text-muted-foreground flex items-center justify-between">
           <span>mDocs</span>
-          <span>Built with Next.js &middot; React &middot; Tailwind &middot; shadcn/ui</span>
+          <span>
+            Built with Next.js &middot; React &middot; Tailwind &middot;
+            shadcn/ui
+          </span>
         </div>
       </footer>
     </div>

@@ -9,6 +9,7 @@ import {
   Folder,
   FolderOpen,
   Globe,
+  BookOpen,
   MoreHorizontal,
   RefreshCw,
   Trash2,
@@ -176,8 +177,9 @@ function SourceCard({ source }: { source: ViewerSource }) {
   const [collapseSignal, setCollapseSignal] = useState<CollapseSignal>({ gen: 0, open: true });
 
   const isServer = source.kind === "local-server";
+  const isDemo = source.kind === "demo";
   const syncing = isServer && (source as LocalServerSource).syncing;
-  const refreshing = isServer ? syncing : browserRefreshing;
+  const refreshing = isServer ? syncing : !isDemo && browserRefreshing;
 
   const hasFolders = useMemo(
     () => source.files.some((f) => f.dirSegments.length > 0),
@@ -200,6 +202,8 @@ function SourceCard({ source }: { source: ViewerSource }) {
       } catch (e) {
         toast.error(`Sync failed: ${(e as Error).message}`);
       }
+    } else if (isDemo) {
+      toast.info("The demo document refreshes when the page reloads.");
     } else {
       setBrowserRefreshing(true);
       try {
@@ -215,6 +219,7 @@ function SourceCard({ source }: { source: ViewerSource }) {
 
   const needsPermission =
     !isServer &&
+    !isDemo &&
     (source.permission === "prompt" || source.permission === "denied");
 
   return (
@@ -225,6 +230,8 @@ function SourceCard({ source }: { source: ViewerSource }) {
             <Folder className="size-3.5 text-muted-foreground" />
           ) : source.kind === "files" ? (
             <Files className="size-3.5 text-muted-foreground" />
+          ) : source.kind === "demo" ? (
+            <BookOpen className="size-3.5 text-muted-foreground" />
           ) : (
             <Globe className="size-3.5 text-muted-foreground" />
           )}
@@ -255,18 +262,20 @@ function SourceCard({ source }: { source: ViewerSource }) {
           </Button>
         )}
 
-        <Button
-          variant="ghost"
-          size="icon-xs"
-          onClick={onRefresh}
-          aria-label={isServer ? "Sync repo" : "Refresh source"}
-          className={cn(
-            "text-muted-foreground hover:text-foreground",
-            refreshing && "animate-spin"
-          )}
-        >
-          <RefreshCw className="size-3" />
-        </Button>
+        {!isDemo && (
+          <Button
+            variant="ghost"
+            size="icon-xs"
+            onClick={onRefresh}
+            aria-label={isServer ? "Sync repo" : "Refresh source"}
+            className={cn(
+              "text-muted-foreground hover:text-foreground",
+              refreshing && "animate-spin"
+            )}
+          >
+            <RefreshCw className="size-3" />
+          </Button>
+        )}
 
         <DropdownMenu>
           <DropdownMenuTrigger
@@ -282,10 +291,15 @@ function SourceCard({ source }: { source: ViewerSource }) {
             <MoreHorizontal className="size-3" />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={onRefresh}>
-              <RefreshCw className="size-3.5" /> {isServer ? "Sync" : "Refresh"}
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
+            {!isDemo && (
+              <>
+                <DropdownMenuItem onClick={onRefresh}>
+                  <RefreshCw className="size-3.5" />{" "}
+                  {isServer ? "Sync" : "Refresh"}
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+              </>
+            )}
             <DropdownMenuItem
               variant="destructive"
               onClick={() => removeSource(source.id)}
