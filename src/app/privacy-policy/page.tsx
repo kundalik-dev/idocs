@@ -8,6 +8,9 @@ export const metadata: Metadata = {
   title: "Privacy Policy",
   description:
     "Privacy policy for mDocs, a local-first Markdown reader for browser files and localhost GitHub repository browsing.",
+  alternates: {
+    canonical: "/privacy-policy",
+  },
 };
 
 export default function PrivacyPolicyPage() {

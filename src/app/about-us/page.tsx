@@ -16,6 +16,9 @@ export const metadata: Metadata = {
   title: "About mDocs",
   description:
     "Learn why mDocs exists and how it helps you read local Markdown files and GitHub repository documentation privately.",
+  alternates: {
+    canonical: "/about-us",
+  },
 };
 
 const principles = [

@@ -8,6 +8,9 @@ export const metadata: Metadata = {
   title: "Contact mDocs",
   description:
     "Contact information for mDocs questions, feedback, issues, and product suggestions.",
+  alternates: {
+    canonical: "/contact-us",
+  },
 };
 
 export default function ContactUsPage() {

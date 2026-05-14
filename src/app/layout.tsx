@@ -25,48 +25,50 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   metadataBase: siteUrl,
-  applicationName: "iDocs",
+  applicationName: "mDocs",
   title: {
-    default: "iDocs - Local Markdown Reader",
-    template: "%s | iDocs",
+    default: "mDocs - Local Markdown Reader",
+    template: "%s | mDocs",
   },
   description:
-    "iDocs is a private, local-first Markdown reader for opening folders and files directly in your browser with a polished reading view, table of contents, and syntax highlighting.",
+    "mDocs is a private, local-first Markdown reader for opening folders, files, and cloned GitHub repository docs in a polished browser viewer with table of contents and syntax highlighting.",
   keywords: [
     "Markdown reader",
     "local Markdown viewer",
     "offline Markdown reader",
     "private document reader",
+    "GitHub repo browser",
+    "local-first docs reader",
     "MD file viewer",
     "Next.js Markdown app",
   ],
-  authors: [{ name: "iDocs" }],
-  creator: "iDocs",
-  publisher: "iDocs",
+  authors: [{ name: "mDocs" }],
+  creator: "mDocs",
+  publisher: "mDocs",
   alternates: {
     canonical: "/",
   },
   openGraph: {
     type: "website",
     url: "/",
-    siteName: "iDocs",
-    title: "iDocs - Local Markdown Reader",
+    siteName: "mDocs",
+    title: "mDocs - Local Markdown Reader",
     description:
-      "Open Markdown files from your machine and read them in a clean, private, local-first viewer.",
+      "Open local Markdown files and cloned GitHub repository docs in a clean, private, local-first viewer.",
     images: [
       {
         url: "/opengraph-image",
         width: 1200,
         height: 630,
-        alt: "iDocs local Markdown reader",
+        alt: "mDocs local-first Markdown reader",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "iDocs - Local Markdown Reader",
+    title: "mDocs - Local Markdown Reader",
     description:
-      "A private, local-first Markdown reader for folders and files on your machine.",
+      "A private, local-first Markdown reader for local files and GitHub repository docs.",
     images: ["/opengraph-image"],
   },
   robots: {
