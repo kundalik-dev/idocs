@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { ThemeProvider } from "@/components/theme-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "sonner";
+import Script from "next/script";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL
   ? new URL(process.env.NEXT_PUBLIC_SITE_URL)
@@ -93,10 +94,15 @@ export default function RootLayout({
         "h-full antialiased",
         inter.variable,
         geistMono.variable,
-        "font-sans"
+        "font-sans",
       )}
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">
+        <Script
+          src="https://cloud.umami.is/script.js"
+          data-website-id="089db91d-ed81-4a11-88bd-7f0b4ee157b0"
+          strategy="afterInteractive"
+        />
         <ThemeProvider
           attribute="class"
           defaultTheme="light"
