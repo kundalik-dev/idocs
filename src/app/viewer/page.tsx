@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import {
   ArrowLeft,
   PanelLeftClose,
@@ -36,6 +36,14 @@ import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
 import { extractToc, parseMarkdown } from "@/lib/markdown";
 
 export default function ViewerPage() {
+  return (
+    <Suspense fallback={<LoadingDoc />}>
+      <ViewerPageContent />
+    </Suspense>
+  );
+}
+
+function ViewerPageContent() {
   const searchParams = useSearchParams();
   const sidebarOpen = useViewerStore((s) => s.sidebarOpen);
   const tocOpen = useViewerStore((s) => s.tocOpen);

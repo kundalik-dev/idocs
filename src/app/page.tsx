@@ -124,6 +124,7 @@ export default function Home() {
             <Button
               variant="default"
               size="sm"
+              nativeButton={false}
               render={<Link href="/viewer" />}
             >
               Open mDocs
@@ -188,57 +189,138 @@ export default function Home() {
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Browser files */}
-              <div className="rounded-xl border border-border bg-muted/20 p-7 flex flex-col gap-4">
-                <div className="size-10 rounded-lg bg-foreground text-background flex items-center justify-center">
-                  <FolderOpen className="size-4.5" />
+              <div className="rounded-xl border border-border bg-muted/20 p-6 md:p-7 flex flex-col gap-5">
+                <div className="flex items-start gap-4">
+                  <div className="size-10 shrink-0 rounded-lg bg-foreground text-background flex items-center justify-center">
+                    <FolderOpen className="size-4.5" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-lg">Browser files</h3>
+                    <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
+                      Open local Markdown without installing anything. Pick a
+                      folder or a few files and start reading immediately.
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="font-semibold text-lg">Browser files</h3>
-                  <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-                    Use the File System Access API to open a local folder or
-                    pick individual files. No install required — just click{" "}
-                    <strong>Open viewer</strong> above and pick your folder.
+
+                <div className="rounded-xl border border-border bg-background/70 p-3 shadow-sm">
+                  <p className="px-1 pb-2 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+                    Quick flow
                   </p>
+                  <div className="divide-y divide-border rounded-lg border border-border bg-background">
+                    {[
+                      {
+                        step: "01",
+                        title: "Open mDocs",
+                        body: "Launch the reader in your browser.",
+                      },
+                      {
+                        step: "02",
+                        title: "Pick files or folder",
+                        body: "Choose Markdown from your local machine.",
+                      },
+                      {
+                        step: "03",
+                        title: "Read and refresh",
+                        body: "Browse the tree, use the TOC, and see edits reload.",
+                      },
+                    ].map((item) => (
+                      <div key={item.step} className="flex gap-3 p-3">
+                        <span className="grid size-7 shrink-0 place-items-center rounded-md bg-muted text-[11px] font-semibold text-muted-foreground">
+                          {item.step}
+                        </span>
+                        <div>
+                          <p className="text-sm font-medium">{item.title}</p>
+                          <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
+                            {item.body}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <ul className="text-sm text-muted-foreground space-y-1.5 mt-auto">
-                  <li className="flex items-center gap-2">
-                    <span className="size-1.5 rounded-full bg-emerald-500 shrink-0" />
-                    No installation needed
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <span className="size-1.5 rounded-full bg-emerald-500 shrink-0" />
-                    Live-reloads on file save
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <span className="size-1.5 rounded-full bg-emerald-500 shrink-0" />
-                    Chromium browsers only
-                  </li>
-                </ul>
+
+                <div className="mt-auto space-y-4">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    nativeButton={false}
+                    render={<Link href="/viewer" />}
+                    className="w-full"
+                  >
+                    Open viewer
+                    <ArrowRight className="size-3.5" />
+                  </Button>
+                  <ul className="grid gap-2 text-sm text-muted-foreground sm:grid-cols-2">
+                    <li className="flex items-center gap-2">
+                      <span className="size-1.5 rounded-full bg-emerald-500 shrink-0" />
+                      No installation
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="size-1.5 rounded-full bg-emerald-500 shrink-0" />
+                      Live reload
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="size-1.5 rounded-full bg-emerald-500 shrink-0" />
+                      Local file handles
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="size-1.5 rounded-full bg-emerald-500 shrink-0" />
+                      Chromium only
+                    </li>
+                  </ul>
+                </div>
               </div>
 
               {/* Local server */}
-              <div className="rounded-xl border border-border bg-muted/20 p-7 flex flex-col gap-4">
-                <div className="size-10 rounded-lg bg-foreground text-background flex items-center justify-center">
-                  <Terminal className="size-4.5" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-lg">
-                    Local server + GitHub repos
-                  </h3>
-                  <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-                    Run the mDocs server locally, then clone any public GitHub
-                    repo straight from the viewer. The server lives at{" "}
-                    <code className="font-mono text-xs px-1 py-0.5 rounded bg-muted border border-border">
-                      127.0.0.1:4873
-                    </code>{" "}
-                    — your docs never leave your machine.
-                  </p>
+              <div className="rounded-xl border border-border bg-muted/20 p-6 md:p-7 flex flex-col gap-5">
+                <div className="flex items-start gap-4">
+                  <div className="size-10 shrink-0 rounded-lg bg-foreground text-background flex items-center justify-center">
+                    <Terminal className="size-4.5" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-lg">
+                      Local server + GitHub repos
+                    </h3>
+                    <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
+                      Run the mDocs server locally, then clone public GitHub
+                      repos from the viewer. It binds to{" "}
+                      <code className="font-mono text-xs px-1 py-0.5 rounded bg-muted border border-border">
+                        127.0.0.1:4873
+                      </code>{" "}
+                      so docs stay on your machine.
+                    </p>
+                  </div>
                 </div>
                 <div className="mt-auto space-y-3">
                   <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
                     Start the server
                   </p>
-                  <CopyCommand command="npx mdocs serve" />
+                  <div className="rounded-xl border border-border bg-background/70 p-2.5 shadow-sm">
+                    <p className="px-1 pb-2 text-[11px] font-medium text-muted-foreground">
+                      Install once, then start with the short command.
+                    </p>
+                    <CopyCommand
+                      label="Install global"
+                      command="npm install -g mdocs"
+                      className="w-full"
+                    />
+                    <CopyCommand
+                      label="Start server"
+                      command="mdocs start"
+                      className="mt-2 w-full"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-[11px] font-medium text-muted-foreground">
+                      Prefer no install?
+                    </p>
+                    <CopyCommand
+                      label="No install"
+                      command="npx mdocs serve"
+                      className="w-full"
+                    />
+                  </div>
                   <ul className="text-sm text-muted-foreground space-y-1.5 pt-1">
                     <li className="flex items-center gap-2">
                       <span className="size-1.5 rounded-full bg-emerald-500 shrink-0" />
@@ -312,6 +394,59 @@ export default function Home() {
 
       {/* ── Footer ── */}
       <footer className="border-t border-border">
+        <div className="max-w-6xl mx-auto px-6 py-12 md:py-14">
+          <div className="grid gap-10 md:grid-cols-[1.4fr_1fr_1fr]">
+            <div className="max-w-md">
+              <Link
+                href="/"
+                className="inline-flex items-center gap-2 font-semibold tracking-tight"
+              >
+                <span className="inline-grid size-6 shrink-0 rounded-md bg-foreground text-background place-items-center text-xs font-bold">
+                  m
+                </span>
+                <span>mDocs</span>
+              </Link>
+              <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
+                A local-first Markdown reader for folders, files, and cloned
+                GitHub repository docs. Read comfortably without moving private
+                documents into a hosted service.
+              </p>
+            </div>
+
+            <div>
+              <h2 className="text-sm font-semibold">Product</h2>
+              <nav className="mt-4 flex flex-col gap-2 text-sm text-muted-foreground">
+                <Link href="/viewer" className="hover:text-foreground">
+                  Open mDocs
+                </Link>
+                <Link
+                  href="/viewer?demo=mdocs-info"
+                  className="hover:text-foreground"
+                >
+                  Demo guide
+                </Link>
+                <a href="/docs/mdocs-info.md" className="hover:text-foreground">
+                  Raw Markdown demo
+                </a>
+              </nav>
+            </div>
+
+            <div>
+              <h2 className="text-sm font-semibold">Company</h2>
+              <nav className="mt-4 flex flex-col gap-2 text-sm text-muted-foreground">
+                <Link href="/about-us" className="hover:text-foreground">
+                  About us
+                </Link>
+                <Link href="/contact-us" className="hover:text-foreground">
+                  Contact us
+                </Link>
+                <Link href="/privacy-policy" className="hover:text-foreground">
+                  Privacy policy
+                </Link>
+              </nav>
+            </div>
+          </div>
+        </div>
         <div className="max-w-6xl mx-auto px-6 py-6 text-xs text-muted-foreground flex items-center justify-between">
           <span>mDocs</span>
           <span>

@@ -431,7 +431,7 @@ export const useViewerStore = create<State & Actions>((set, get) => ({
 
   refreshSource: async (sourceId) => {
     const src = get().sources.find((s) => s.id === sourceId);
-    if (!src || src.kind === "local-server") return;
+    if (!src || src.kind === "local-server" || src.kind === "demo") return;
 
     let nextFiles: BrowserViewerFile[] = src.files;
     if (src.kind === "folder" && src.directoryHandle) {

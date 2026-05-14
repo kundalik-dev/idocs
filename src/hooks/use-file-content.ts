@@ -38,28 +38,27 @@ export function useFileContent(file: ViewerFile | null): FileContentState {
 
     if (file.sourceType === "demo-doc") {
       let cancelled = false;
-      setLoading(true);
-      setError(null);
-
-      fetch(file.publicPath)
-        .then((response) => {
+      const loadDemoDoc = async () => {
+        setLoading(true);
+        setError(null);
+        try {
+          const response = await fetch(file.publicPath);
           if (!response.ok) {
             throw new Error(`Demo document not found (${response.status})`);
           }
-          return response.text();
-        })
-        .then((content) => {
+          const content = await response.text();
           if (cancelled) return;
           setText(content);
           setLastModified(Date.now());
-        })
-        .catch((e: unknown) => {
+        } catch (e) {
           if (cancelled) return;
           setError(e instanceof Error ? e : new Error(String(e)));
-        })
-        .finally(() => {
+        } finally {
           if (!cancelled) setLoading(false);
-        });
+        }
+      };
+
+      void loadDemoDoc();
 
       return () => {
         cancelled = true;
@@ -68,24 +67,24 @@ export function useFileContent(file: ViewerFile | null): FileContentState {
 
     if (file.sourceType === "local-server") {
       let cancelled = false;
-      setLoading(true);
-      setError(null);
-
-      const client = new ServerClient(file.serverUrl);
-      client
-        .readFile(file.repoId, file.relPath)
-        .then((result) => {
+      const loadServerFile = async () => {
+        setLoading(true);
+        setError(null);
+        try {
+          const client = new ServerClient(file.serverUrl);
+          const result = await client.readFile(file.repoId, file.relPath);
           if (cancelled) return;
           setText(result.content);
           setLastModified(result.lastModified);
-        })
-        .catch((e: unknown) => {
+        } catch (e) {
           if (cancelled) return;
           setError(e instanceof Error ? e : new Error(String(e)));
-        })
-        .finally(() => {
+        } finally {
           if (!cancelled) setLoading(false);
-        });
+        }
+      };
+
+      void loadServerFile();
 
       return () => {
         cancelled = true;

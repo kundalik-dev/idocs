@@ -5,6 +5,7 @@ import {
   Check,
   ChevronDown,
   ChevronRight,
+  Copy,
   GitBranch,
   Globe,
   Loader2,
@@ -19,6 +20,8 @@ import { useViewerStore, type LocalServerSource } from "@/store/viewer-store";
 
 const GITHUB_RE =
   /^https:\/\/github\.com\/[\w.-]+\/[\w.-]+(\.git)?(\/.*)?$/i;
+
+const SERVER_COMMAND = "npx mdocs serve";
 
 export function ServerPanel() {
   const serverUrl = useViewerStore((s) => s.serverUrl);
@@ -223,8 +226,7 @@ export function ServerPanel() {
           {/* ── Offline hint ── */}
           {serverStatus === "error" && (
             <p className="text-[11px] text-muted-foreground leading-snug">
-              Can&apos;t reach the server. Run{" "}
-              <code className="rounded bg-muted px-1">npx mdocs serve</code>.
+              Can&apos;t reach the server. Run <InlineCopyCommand command={SERVER_COMMAND} />.
             </p>
           )}
 
@@ -339,5 +341,38 @@ export function ServerPanel() {
         </div>
       )}
     </div>
+  );
+}
+
+function InlineCopyCommand({ command }: { command: string }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(command);
+      setCopied(true);
+      toast.success("Command copied");
+      setTimeout(() => setCopied(false), 1600);
+    } catch {
+      toast.error("Could not copy command");
+    }
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={handleCopy}
+      aria-label={copied ? "Command copied" : "Copy server command"}
+      title="Copy command"
+      className={cn(
+        "inline-flex align-baseline items-center gap-1 rounded-md border px-1.5 py-0.5 font-mono text-[11px] leading-none shadow-sm transition-colors",
+        copied
+          ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
+          : "border-border bg-background text-foreground hover:border-foreground/30 hover:bg-muted"
+      )}
+    >
+      <code>{command}</code>
+      {copied ? <Check className="size-3" /> : <Copy className="size-3" />}
+    </button>
   );
 }

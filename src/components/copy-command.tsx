@@ -4,7 +4,15 @@ import { Check, Copy } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 
-export function CopyCommand({ command }: { command: string }) {
+export function CopyCommand({
+  command,
+  label,
+  className,
+}: {
+  command: string;
+  label?: string;
+  className?: string;
+}) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
@@ -18,21 +26,33 @@ export function CopyCommand({ command }: { command: string }) {
   };
 
   return (
-    <div className="inline-flex items-center gap-3 rounded-lg border border-border bg-muted/50 px-4 py-2.5 font-mono text-sm">
-      <span className="text-muted-foreground select-all">{command}</span>
-      <button
-        type="button"
-        onClick={handleCopy}
-        aria-label={copied ? "Copied" : "Copy command"}
+    <button
+      type="button"
+      onClick={handleCopy}
+      aria-label={copied ? "Copied" : `Copy ${command}`}
+      className={cn(
+        "inline-flex items-center gap-3 rounded-lg border border-border bg-background px-3 py-2.5 text-left shadow-sm transition-colors",
+        "hover:border-foreground/25 hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50",
+        copied && "border-emerald-500/40 bg-emerald-500/10",
+        className
+      )}
+    >
+      {label ? (
+        <span className="min-w-24 shrink-0 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+          {label}
+        </span>
+      ) : null}
+      <code className="flex-1 select-all whitespace-nowrap font-mono text-sm text-foreground">
+        {command}
+      </code>
+      <span
         className={cn(
           "shrink-0 rounded-md p-1 transition-colors",
-          copied
-            ? "text-emerald-500"
-            : "text-muted-foreground hover:text-foreground hover:bg-muted"
+          copied ? "text-emerald-500" : "text-muted-foreground"
         )}
       >
         {copied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
-      </button>
-    </div>
+      </span>
+    </button>
   );
 }
