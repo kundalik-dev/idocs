@@ -5,6 +5,7 @@ Read this file first when you are the next AI assistant working on this repo.
 ## Project Summary
 
 This project is **mDocs**, a local-first Markdown reader and GitHub repo browser. It has two modes:
+
 1. **Browser files** — open local folders/files via the File System Access API (no install needed, Chromium only)
 2. **Local server** — connect to `npx mdocs serve` running on `127.0.0.1:4873` to clone and browse GitHub repos
 
@@ -15,6 +16,7 @@ Documents never leave the machine. No uploads, no backend persistence.
 This repo uses **Next.js 16.2.5**, and APIs/conventions may differ from training data.
 
 Before editing Next.js app code, read the relevant docs from:
+
 ```text
 node_modules/next/dist/docs/
 ```
@@ -56,6 +58,7 @@ pnpm build
 ## Important Files
 
 ### App pages
+
 ```
 src/app/page.tsx              — landing page (Server Component)
 src/app/viewer/page.tsx       — viewer page (Client Component)
@@ -63,6 +66,7 @@ src/app/layout.tsx            — root shell: fonts, theme provider, Sonner
 ```
 
 ### Components
+
 ```
 src/components/copy-command.tsx          — "use client" copy-to-clipboard button for npx command
 src/components/theme-toggle.tsx          — light/dark toggle
@@ -79,6 +83,7 @@ src/components/viewer/
 ```
 
 ### State & persistence
+
 ```
 src/store/viewer-store.ts     — Zustand store (all viewer state + actions)
 src/lib/idb.ts                — IndexedDB helpers (idb-keyval)
@@ -88,6 +93,7 @@ src/lib/markdown.ts           — parseMarkdown, extractToc
 ```
 
 ### Hooks
+
 ```
 src/hooks/use-file-content.ts     — reads active file; branches on sourceType
 src/hooks/use-keyboard-shortcuts.ts
@@ -98,34 +104,52 @@ src/hooks/use-keyboard-shortcuts.ts
 ## Type System (discriminated unions)
 
 ### ViewerFile
+
 ```ts
 type BrowserViewerFile = {
-  id, sourceId, sourceType: "browser-fs",
-  name, relPath, dirSegments,
-  handle: FileSystemFileHandle
+  id;
+  sourceId;
+  sourceType: "browser-fs";
+  name;
+  relPath;
+  dirSegments;
+  handle: FileSystemFileHandle;
 };
 type ServerViewerFile = {
-  id, sourceId, sourceType: "local-server",
-  name, relPath, dirSegments,
-  repoId: string, serverUrl: string
+  id;
+  sourceId;
+  sourceType: "local-server";
+  name;
+  relPath;
+  dirSegments;
+  repoId: string;
+  serverUrl: string;
 };
 type ViewerFile = BrowserViewerFile | ServerViewerFile;
 ```
 
 ### ViewerSource
+
 ```ts
 type BrowserSource = {
-  id, kind: "folder" | "files", name,
-  directoryHandle?, fileHandles?,
-  files: BrowserViewerFile[],
-  permission: "granted" | "prompt" | "denied" | "unknown"
+  id;
+  kind: "folder" | "files";
+  name;
+  directoryHandle?;
+  fileHandles?;
+  files: BrowserViewerFile[];
+  permission: "granted" | "prompt" | "denied" | "unknown";
 };
 type LocalServerSource = {
-  id, kind: "local-server", name,
-  repoId, serverUrl, branch,
-  files: ServerViewerFile[],
-  permission: "granted",
-  syncing: boolean
+  id;
+  kind: "local-server";
+  name;
+  repoId;
+  serverUrl;
+  branch;
+  files: ServerViewerFile[];
+  permission: "granted";
+  syncing: boolean;
 };
 type ViewerSource = BrowserSource | LocalServerSource;
 ```
@@ -134,15 +158,15 @@ type ViewerSource = BrowserSource | LocalServerSource;
 
 ## Viewer Store — Key State
 
-| Field | Default | Purpose |
-|---|---|---|
-| `sources` | `[]` | All open sources |
-| `activeSourceId` | `null` | Which project is shown (project switcher) |
-| `activeFileId` | `null` | Currently open file |
-| `serverUrl` | `http://127.0.0.1:4873` | Local server URL |
-| `serverStatus` | `"disconnected"` | Health poll result |
-| `sidebarOpen` | `true` | Sidebar visibility |
-| `tocOpen` | `true` | TOC rail visibility |
+| Field            | Default                 | Purpose                                   |
+| ---------------- | ----------------------- | ----------------------------------------- |
+| `sources`        | `[]`                    | All open sources                          |
+| `activeSourceId` | `null`                  | Which project is shown (project switcher) |
+| `activeFileId`   | `null`                  | Currently open file                       |
+| `serverUrl`      | `http://127.0.0.1:4873` | Local server URL                          |
+| `serverStatus`   | `"disconnected"`        | Health poll result                        |
+| `sidebarOpen`    | `true`                  | Sidebar visibility                        |
+| `tocOpen`        | `true`                  | TOC rail visibility                       |
 
 Key actions: `addFolder`, `addFiles`, `addServerSource`, `setActiveSource`, `removeSource`, `syncServerSource`, `setServerUrl`, `setServerStatus`
 
@@ -154,14 +178,14 @@ Selectors: `selectActiveFile`, `selectActiveSource`, `selectAllFiles`
 
 DB: `mdocs-db` / `mdocs-store`
 
-| Key | Content |
-|---|---|
-| `sources:v1` | `StoredSource[]` — browser-fs sources with FileSystem handles |
-| `serverSources:v1` | `StoredServerSource[]` — server sources (plain JSON) |
-| `serverUrl:v1` | `string` — last used server URL |
-| `activeFileId:v1` | `string \| null` |
-| `sidebarOpen:v1` | `boolean` |
-| `tocOpen:v1` | `boolean` |
+| Key                | Content                                                       |
+| ------------------ | ------------------------------------------------------------- |
+| `sources:v1`       | `StoredSource[]` — browser-fs sources with FileSystem handles |
+| `serverSources:v1` | `StoredServerSource[]` — server sources (plain JSON)          |
+| `serverUrl:v1`     | `string` — last used server URL                               |
+| `activeFileId:v1`  | `string \| null`                                              |
+| `sidebarOpen:v1`   | `boolean`                                                     |
+| `tocOpen:v1`       | `boolean`                                                     |
 
 ---
 
@@ -169,13 +193,13 @@ DB: `mdocs-db` / `mdocs-store`
 
 ```ts
 class ServerClient {
-  checkHealth(): Promise<HealthResponse>    // timeout 3s
-  listRepos(): Promise<RepoMeta[]>
-  cloneRepo(url, branch?): Promise<RepoMeta>
-  syncRepo(repoId): Promise<RepoMeta>
-  listFiles(repoId): Promise<FileRef[]>
-  readFile(repoId, relPath): Promise<FileContent>
-  deleteRepo(repoId): Promise<void>
+  checkHealth(): Promise<HealthResponse>; // timeout 3s
+  listRepos(): Promise<RepoMeta[]>;
+  cloneRepo(url, branch?): Promise<RepoMeta>;
+  syncRepo(repoId): Promise<RepoMeta>;
+  listFiles(repoId): Promise<FileRef[]>;
+  readFile(repoId, relPath): Promise<FileContent>;
+  deleteRepo(repoId): Promise<void>;
 }
 ```
 
