@@ -53,11 +53,12 @@ function ViewerPageContent() {
   const setTocOpen = useViewerStore((s) => s.setTocOpen);
   const hydrate = useViewerStore((s) => s.hydrate);
   const hydrated = useViewerStore((s) => s.hydrated);
-  const openDemoDoc = useViewerStore((s) => s.openDemoDoc);
+  const openBlogDoc = useViewerStore((s) => s.openBlogDoc);
   const activeFile = useViewerStore(selectActiveFile);
   const sources = useViewerStore((s) => s.sources);
   const hasSources = sources.length > 0;
   const [isMobileLayout, setIsMobileLayout] = useState<boolean | null>(null);
+  const [blogLoadError, setBlogLoadError] = useState<string | null>(null);
   const collapsedMobileOnce = useRef(false);
 
   useKeyboardShortcuts();
@@ -83,9 +84,35 @@ function ViewerPageContent() {
 
   useEffect(() => {
     if (!hydrated) return;
-    const demo = searchParams.get("demo");
-    if (demo) openDemoDoc(demo);
-  }, [hydrated, openDemoDoc, searchParams]);
+    const blog = searchParams.get("blog");
+    const legacyDemo = searchParams.get("demo");
+    const slug =
+      blog ?? (legacyDemo === "mdocs-info" ? "mdocks-info" : legacyDemo);
+    if (!slug) {
+      setBlogLoadError(null);
+      return;
+    }
+
+    let cancelled = false;
+    setBlogLoadError(null);
+    openBlogDoc(slug)
+      .then((opened) => {
+        if (cancelled) return;
+        setBlogLoadError(opened ? null : `Blog post "${slug}" was not found.`);
+      })
+      .catch((error) => {
+        if (cancelled) return;
+        setBlogLoadError(
+          error instanceof Error
+            ? error.message
+            : `Blog post "${slug}" could not be loaded.`,
+        );
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [hydrated, openBlogDoc, searchParams]);
 
   const { text, loading, error, lastModified, reload } =
     useFileContent(activeFile);
@@ -242,7 +269,9 @@ function ViewerPageContent() {
         <main className="flex-1 min-w-0 flex">
           <div className="flex-1 min-w-0 overflow-y-auto thin-scrollbar">
             <div className="mx-auto w-full max-w-6xl px-5 sm:px-6 md:px-10 lg:px-14 py-10 md:py-16">
-              {!activeFile ? (
+              {blogLoadError ? (
+                <ErrorState message={blogLoadError} />
+              ) : !activeFile ? (
                 <EmptyState hydrated={hydrated} hasSources={hasSources} />
               ) : loading && text === null ? (
                 <LoadingDoc />
@@ -426,22 +455,18 @@ function EmptyState({
   );
 }
 
-function ErrorState({
-  message,
-  onRetry,
-}: {
-  message: string;
-  onRetry: () => void;
-}) {
+function ErrorState({ message, onRetry }: { message: string; onRetry?: () => void }) {
   return (
     <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-6">
       <h2 className="text-lg font-semibold text-destructive">
         Couldn&apos;t read this file
       </h2>
       <p className="mt-2 text-sm text-muted-foreground">{message}</p>
-      <Button variant="outline" size="sm" className="mt-4" onClick={onRetry}>
-        <RefreshCw className="size-3.5" /> Try again
-      </Button>
+      {onRetry ? (
+        <Button variant="outline" size="sm" className="mt-4" onClick={onRetry}>
+          <RefreshCw className="size-3.5" /> Try again
+        </Button>
+      ) : null}
     </div>
   );
 }

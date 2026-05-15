@@ -20,13 +20,13 @@ import {
 function SourceIcon({ source, className }: { source: ViewerSource; className?: string }) {
   if (source.kind === "folder") return <Folder className={cn("shrink-0", className)} />;
   if (source.kind === "files") return <Files className={cn("shrink-0", className)} />;
-  if (source.kind === "demo") return <BookOpen className={cn("shrink-0", className)} />;
+  if (source.kind === "blog") return <BookOpen className={cn("shrink-0", className)} />;
   return <Globe className={cn("shrink-0", className)} />;
 }
 
 function sourceSublabel(source: ViewerSource): string {
   if (source.kind === "local-server") return source.branch;
-  if (source.kind === "demo") return "demo guide";
+  if (source.kind === "blog") return "blog";
   if (source.kind === "folder") return "folder";
   return `${source.files.length} file${source.files.length === 1 ? "" : "s"}`;
 }

@@ -1,8 +1,9 @@
 ---
 title: mDocks Demo Guide
 description: A guided tour of mDocks features, workflows, and practical use cases
-date: 2026-05-14
-tags: [mDocks, markdown, local-first, demo]
+date: 2026-05-11
+author: mDocks
+tags: [mDocks, markdown, local-first]
 ---
 
 # mDocks Demo Guide
@@ -16,8 +17,6 @@ It opens Markdown from your machine or from GitHub repositories cloned through a
 ## What mDocks is for
 
 mDocks is useful when your Markdown files are scattered across folders, projects, and repositories, but you want one calm place to read them.
-
-Common use cases:
 
 | Use case              | How mDocks helps                                                                         |
 | --------------------- | ---------------------------------------------------------------------------------------- |
@@ -75,7 +74,7 @@ The server is local. It is there to do things a browser cannot safely do by itse
 The viewer is designed for long-form technical reading.
 
 - **Sidebar**: shows the active source and its file tree.
-- **Project switcher**: moves between folders, picked files, and cloned repos.
+- **Project switcher**: moves between folders, picked files, blog posts, and cloned repos.
 - **Table of contents**: follows document headings when a file has structure.
 - **Frontmatter card**: displays metadata from the `---` block at the top of a file.
 - **Code highlighting**: uses Shiki for readable code blocks.
@@ -87,50 +86,11 @@ The viewer is designed for long-form technical reading.
 | Shortcut | Action                                      |
 | -------- | ------------------------------------------- |
 | `s`      | Toggle the sidebar                          |
+| `w`      | Toggle the table of contents                |
 | `a`      | Open the previous file in the active source |
 | `d`      | Open the next file in the active source     |
 
 Use the project switcher when you want to jump between different folders or repositories. Use the file tree when you want to stay inside the current project.
-
-## Example workflow: local project docs
-
-Imagine you have this project structure:
-
-```text
-my-app/
-  README.md
-  docs/
-    architecture.md
-    api.md
-    deployment.md
-  notes/
-    release-plan.md
-```
-
-In mDocks:
-
-1. Click **Open folder**.
-2. Pick `my-app`.
-3. Open `README.md` from the sidebar.
-4. Use the table of contents to jump between sections.
-5. Edit `docs/api.md` in your editor.
-6. Return to mDocks and continue reading after the content refreshes.
-
-## Example workflow: GitHub documentation
-
-When the docs live in a repository:
-
-1. Start the local server.
-2. Open the server panel in mDocks.
-3. Paste a repository URL, for example:
-
-```text
-https://github.com/owner/repo
-```
-
-4. Add the repo.
-5. Browse `README.md`, `docs/`, and other Markdown files from the same viewer.
-6. Sync the repo when you want to refresh it.
 
 ## Privacy model
 
@@ -144,19 +104,15 @@ mDocks is intentionally local-first.
 
 If you are reading private or internal documentation, this model keeps the reading workflow close to your filesystem instead of moving documents into a hosted service.
 
-## What this demo document shows
+## Blog setup
 
-This file is also a test document for the viewer. It includes:
+Public blog posts live in `public/blogs`. The blog list comes from `public/blogs/index.json`, and each post opens inside the mDocks viewer through a URL like:
 
-- Frontmatter metadata
-- Multiple heading levels
-- Tables
-- Lists
-- Blockquotes
-- Code blocks
-- Inline code
+```text
+/viewer?blog=mdocks-info
+```
 
-That means you can use it to confirm the reading layout, table of contents, metadata card, and syntax highlighting.
+The viewer loads the Markdown from the static file path listed in the manifest.
 
 ## Quick checklist
 

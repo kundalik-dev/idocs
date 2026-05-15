@@ -104,7 +104,10 @@ export default function RootLayout({
         "font-sans",
       )}
     >
-      <body className="min-h-full flex flex-col bg-background text-foreground">
+      <body
+        suppressHydrationWarning
+        className="min-h-full flex flex-col bg-background text-foreground"
+      >
         <Script
           src="https://cloud.umami.is/script.js"
           data-website-id="089db91d-ed81-4a11-88bd-7f0b4ee157b0"

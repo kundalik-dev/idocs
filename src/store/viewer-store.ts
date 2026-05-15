@@ -19,6 +19,10 @@ import {
 } from "@/lib/idb";
 import { WalkedFile, ensureReadPermission, walkDirectory } from "@/lib/fs";
 import { ServerClient, type RepoMeta, type FileRef } from "@/lib/local-server-client";
+import {
+  normalizeBlogManifest,
+  type BlogPostManifestItem,
+} from "@/lib/blogs";
 
 // ─── File types ───────────────────────────────────────────────────────────────
 
@@ -43,17 +47,20 @@ export type ServerViewerFile = {
   serverUrl: string;
 };
 
-export type DemoViewerFile = {
+export type BlogViewerFile = {
   id: string;
   sourceId: string;
-  sourceType: "demo-doc";
+  sourceType: "blog-doc";
   name: string;
   relPath: string;
   dirSegments: string[];
+  slug: string;
+  title: string;
+  date: string;
   publicPath: string;
 };
 
-export type ViewerFile = BrowserViewerFile | ServerViewerFile | DemoViewerFile;
+export type ViewerFile = BrowserViewerFile | ServerViewerFile | BlogViewerFile;
 
 // ─── Source types ─────────────────────────────────────────────────────────────
 
@@ -79,15 +86,15 @@ export type LocalServerSource = {
   syncing: boolean;
 };
 
-export type DemoSource = {
+export type BlogSource = {
   id: string;
-  kind: "demo";
+  kind: "blog";
   name: string;
-  files: DemoViewerFile[];
+  files: BlogViewerFile[];
   permission: "granted";
 };
 
-export type ViewerSource = BrowserSource | LocalServerSource | DemoSource;
+export type ViewerSource = BrowserSource | LocalServerSource | BlogSource;
 
 // ─── Store state & actions ────────────────────────────────────────────────────
 
@@ -118,8 +125,8 @@ type Actions = {
   addServerSource: (repo: RepoMeta, files: FileRef[]) => void;
   syncServerSource: (sourceId: string) => Promise<void>;
   removeServerSource: (sourceId: string) => Promise<void>;
-  // demo docs
-  openDemoDoc: (slug: string) => void;
+  // blog docs
+  openBlogDoc: (slug: string) => Promise<boolean>;
   // navigation
   setActiveSource: (sourceId: string) => void;
   setActiveFile: (fileId: string) => void;
@@ -140,17 +147,8 @@ function normalizeServerUrl(url: string | null): string {
   return url === LEGACY_SERVER_URL || url === null ? DEFAULT_SERVER_URL : url;
 }
 
-const DEMO_DOCS: Record<
-  string,
-  { sourceName: string; fileName: string; relPath: string; publicPath: string }
-> = {
-  "mdocs-info": {
-    sourceName: "mDocks Demo",
-    fileName: "mdocs-info.md",
-    relPath: "mdocs-info.md",
-    publicPath: "/docs/mdocs-info.md",
-  },
-};
+const BLOG_SOURCE_ID = "blog-mdocks";
+const BLOG_SOURCE_NAME = "mDocks Blog";
 
 const flatten = (sources: ViewerSource[]): ViewerFile[] =>
   sources.flatMap((s) => s.files as ViewerFile[]);
@@ -204,6 +202,29 @@ function toServerFiles(sourceId: string, refs: FileRef[], serverUrl: string): Se
     repoId: ref.repoId,
     serverUrl,
   }));
+}
+
+function toBlogFiles(posts: BlogPostManifestItem[]): BlogViewerFile[] {
+  return posts.map((post) => ({
+    id: `${BLOG_SOURCE_ID}::${post.slug}`,
+    sourceId: BLOG_SOURCE_ID,
+    sourceType: "blog-doc" as const,
+    name: `${post.title}.md`,
+    relPath: post.title,
+    dirSegments: [],
+    slug: post.slug,
+    title: post.title,
+    date: post.date,
+    publicPath: post.file,
+  }));
+}
+
+async function loadBlogPosts(): Promise<BlogPostManifestItem[]> {
+  const response = await fetch("/blogs/index.json", { cache: "no-store" });
+  if (!response.ok) {
+    throw new Error(`Blog index not found (${response.status})`);
+  }
+  return normalizeBlogManifest(await response.json());
 }
 
 async function persist(state: State): Promise<void> {
@@ -447,7 +468,7 @@ export const useViewerStore = create<State & Actions>((set, get) => ({
 
   refreshSource: async (sourceId) => {
     const src = get().sources.find((s) => s.id === sourceId);
-    if (!src || src.kind === "local-server" || src.kind === "demo") return;
+    if (!src || src.kind === "local-server" || src.kind === "blog") return;
 
     let nextFiles: BrowserViewerFile[] = src.files;
     if (src.kind === "folder" && src.directoryHandle) {
@@ -581,41 +602,34 @@ export const useViewerStore = create<State & Actions>((set, get) => ({
 
   // ─── Demo docs ────────────────────────────────────────────────────────────
 
-  openDemoDoc: (slug) => {
-    const doc = DEMO_DOCS[slug];
-    if (!doc) return;
+  openBlogDoc: async (slug) => {
+    const posts = await loadBlogPosts();
+    const files = toBlogFiles(posts);
+    const activeFile = files.find((file) => file.slug === slug);
+    if (!activeFile) return false;
 
-    const sourceId = `demo-${slug}`;
-    const fileId = `${sourceId}::${doc.relPath}`;
-    const file: DemoViewerFile = {
-      id: fileId,
-      sourceId,
-      sourceType: "demo-doc",
-      name: doc.fileName,
-      relPath: doc.relPath,
-      dirSegments: [],
-      publicPath: doc.publicPath,
-    };
-    const next: DemoSource = {
-      id: sourceId,
-      kind: "demo",
-      name: doc.sourceName,
-      files: [file],
+    const next: BlogSource = {
+      id: BLOG_SOURCE_ID,
+      kind: "blog",
+      name: BLOG_SOURCE_NAME,
+      files,
       permission: "granted",
     };
 
     set((s) => {
-      const exists = s.sources.some((src) => src.id === sourceId);
+      const exists = s.sources.some((src) => src.id === BLOG_SOURCE_ID);
       const sources = exists
-        ? s.sources.map((src) => (src.id === sourceId ? next : src))
+        ? s.sources.map((src) => (src.id === BLOG_SOURCE_ID ? next : src))
         : [next, ...s.sources];
 
       return {
         sources,
-        activeSourceId: sourceId,
-        activeFileId: fileId,
+        activeSourceId: BLOG_SOURCE_ID,
+        activeFileId: activeFile.id,
       };
     });
+
+    return true;
   },
 
   // ─── Navigation ───────────────────────────────────────────────────────────

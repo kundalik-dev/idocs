@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { getBlogPosts } from "@/lib/blogs-server";
 
 export const dynamic = "force-static";
 
@@ -21,6 +22,11 @@ const routes = [
     priority: 0.8,
   },
   {
+    path: "/blogs",
+    changeFrequency: "weekly",
+    priority: 0.7,
+  },
+  {
     path: "/privacy-policy",
     changeFrequency: "yearly",
     priority: 0.5,
@@ -39,10 +45,20 @@ const routes = [
   images?: string[];
 }>;
 
-export default function sitemap(): MetadataRoute.Sitemap {
-  return routes.map(({ path, ...route }) => ({
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const staticRoutes = routes.map(({ path, ...route }) => ({
     url: `${siteUrl}${path === "/" ? "" : path}`,
     lastModified,
     ...route,
   }));
+
+  const posts = await getBlogPosts();
+  const blogRoutes = posts.map((post) => ({
+    url: `${siteUrl}/blogs/${post.slug}`,
+    lastModified: new Date(post.date),
+    changeFrequency: "monthly" as const,
+    priority: 0.7,
+  }));
+
+  return [...staticRoutes, ...blogRoutes];
 }

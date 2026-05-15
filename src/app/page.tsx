@@ -168,9 +168,9 @@ export default function Home() {
                 size="lg"
                 variant="outline"
                 nativeButton={false}
-                render={<Link href="/viewer?demo=mdocs-info" />}
+                render={<Link href="/viewer?blog=mdocks-info" />}
               >
-                View demo in mDocks
+                Read blog in mDocks
                 <BookOpen className="size-4" />
               </Button>
             </div>
@@ -416,14 +416,17 @@ export default function Home() {
                   Open mDocks
                 </Link>
                 <Link
-                  href="/viewer?demo=mdocs-info"
+                  href="/viewer?blog=mdocks-info"
                   className="hover:text-foreground"
                 >
+                  Blog guide
+                </Link>
+                <Link href="/blogs" className="hover:text-foreground">
+                  Blog
+                </Link>
+                <Link href="/blogs/mdocks-info" className="hover:text-foreground">
                   Demo guide
                 </Link>
-                <a href="/docs/mdocs-info.md" className="hover:text-foreground">
-                  Raw Markdown demo
-                </a>
               </nav>
             </div>
 
