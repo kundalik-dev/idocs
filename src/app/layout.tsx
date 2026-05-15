@@ -82,6 +82,11 @@ export const metadata: Metadata = {
       "max-video-preview": -1,
     },
   },
+  verification: {
+    other: {
+      "msvalidate.01": "D66CD9963A001120C42B89E3C51B4D10",
+    },
+  },
   category: "technology",
 };
 
