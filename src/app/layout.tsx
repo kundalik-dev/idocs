@@ -110,6 +110,18 @@ export default function RootLayout({
           data-website-id="089db91d-ed81-4a11-88bd-7f0b4ee157b0"
           strategy="afterInteractive"
         />
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-2H442DGDH3"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-2H442DGDH3');
+          `}
+        </Script>
         <ThemeProvider
           attribute="class"
           defaultTheme="light"
