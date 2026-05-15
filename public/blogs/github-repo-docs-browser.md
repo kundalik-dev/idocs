@@ -1,7 +1,7 @@
 ---
 title: "GitHub Repo Docs Browser"
 description: "Use mDocks to browse Markdown documentation from GitHub repositories through a local server."
-date: "2026-05-18"
+date: "2026-05-14"
 author: "mDocks"
 tags: ["github", "documentation", "developer-tools"]
 ---

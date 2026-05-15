@@ -424,9 +424,9 @@ export default function Home() {
                 <Link href="/blogs" className="hover:text-foreground">
                   Blog
                 </Link>
-                <a href="/blogs/mdocks-info.md" className="hover:text-foreground">
-                  Raw Markdown guide
-                </a>
+                <Link href="/blogs/mdocks-info" className="hover:text-foreground">
+                  Demo guide
+                </Link>
               </nav>
             </div>
 

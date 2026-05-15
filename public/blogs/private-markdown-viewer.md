@@ -1,7 +1,7 @@
 ---
 title: "Private Markdown Viewer"
 description: "A private way to read Markdown files, folders, and repo docs without moving documents into a hosted workspace."
-date: "2026-05-17"
+date: "2026-05-13"
 author: "mDocks"
 tags: ["privacy", "markdown", "local-first"]
 ---

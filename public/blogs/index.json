@@ -3,7 +3,7 @@
     "slug": "local-markdown-reader",
     "title": "Local Markdown Reader",
     "description": "How mDocks helps you open and read Markdown folders from your own machine without uploading files.",
-    "date": "2026-05-19",
+    "date": "2026-05-15",
     "author": "mDocks",
     "tags": ["markdown", "local-first", "privacy"],
     "file": "/blogs/local-markdown-reader.md"
@@ -12,7 +12,7 @@
     "slug": "github-repo-docs-browser",
     "title": "GitHub Repo Docs Browser",
     "description": "Use mDocks to browse Markdown documentation from GitHub repositories through a local server.",
-    "date": "2026-05-18",
+    "date": "2026-05-14",
     "author": "mDocks",
     "tags": ["github", "documentation", "developer-tools"],
     "file": "/blogs/github-repo-docs-browser.md"
@@ -21,7 +21,7 @@
     "slug": "private-markdown-viewer",
     "title": "Private Markdown Viewer",
     "description": "A private way to read Markdown files, folders, and repo docs without moving documents into a hosted workspace.",
-    "date": "2026-05-17",
+    "date": "2026-05-13",
     "author": "mDocks",
     "tags": ["privacy", "markdown", "local-first"],
     "file": "/blogs/private-markdown-viewer.md"
@@ -30,7 +30,7 @@
     "slug": "compare-obsidian",
     "title": "mDocks vs Obsidian",
     "description": "How mDocks compares with Obsidian when your main goal is reading Markdown docs instead of building a personal knowledge base.",
-    "date": "2026-05-16",
+    "date": "2026-05-12",
     "author": "mDocks",
     "tags": ["comparison", "obsidian", "markdown"],
     "file": "/blogs/compare-obsidian.md"
@@ -39,7 +39,7 @@
     "slug": "mdocks-info",
     "title": "mDocks Demo Guide",
     "description": "A guided tour of mDocks features, workflows, and practical use cases.",
-    "date": "2026-05-15",
+    "date": "2026-05-11",
     "author": "mDocks",
     "tags": ["mDocks", "markdown", "local-first"],
     "file": "/blogs/mdocks-info.md"

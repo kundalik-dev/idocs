@@ -210,7 +210,7 @@ tags: ["markdown", "local-first", "developer-tools"]
 # Why mDocks is local-first
 ```
 
-Add every public post to `public/blogs/index.json`. The UI sorts posts newest first by `date`, and each card links to `/viewer?blog=<slug>`.
+Add every public post to `public/blogs/index.json`. The UI sorts posts newest first by `date`, links each card to `/blogs/<slug>`, and offers `/viewer?blog=<slug>` for reading inside the app viewer.
 
 ## Reader Shortcuts
 

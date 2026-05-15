@@ -1,7 +1,7 @@
 ---
 title: mDocks Demo Guide
 description: A guided tour of mDocks features, workflows, and practical use cases
-date: 2026-05-15
+date: 2026-05-11
 author: mDocks
 tags: [mDocks, markdown, local-first]
 ---

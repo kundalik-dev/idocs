@@ -1,7 +1,7 @@
 ---
 title: "mDocks vs Obsidian"
 description: "How mDocks compares with Obsidian when your main goal is reading Markdown docs instead of building a personal knowledge base."
-date: "2026-05-16"
+date: "2026-05-12"
 author: "mDocks"
 tags: ["comparison", "obsidian", "markdown"]
 ---

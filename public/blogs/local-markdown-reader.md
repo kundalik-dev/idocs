@@ -1,7 +1,7 @@
 ---
 title: "Local Markdown Reader"
 description: "How mDocks helps you open and read Markdown folders from your own machine without uploading files."
-date: "2026-05-19"
+date: "2026-05-15"
 author: "mDocks"
 tags: ["markdown", "local-first", "privacy"]
 ---

@@ -150,9 +150,9 @@ export default async function BlogsPage() {
               >
                 Blog guide
               </Link>
-              <a href="/blogs/mdocks-info.md" className="hover:text-foreground">
-                Raw Markdown guide
-              </a>
+              <Link href="/blogs/mdocks-info" className="hover:text-foreground">
+                Demo guide
+              </Link>
             </nav>
           </div>
 
