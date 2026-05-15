@@ -25,13 +25,13 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   metadataBase: siteUrl,
-  applicationName: "mDocs",
+  applicationName: "mDocks",
   title: {
-    default: "mDocs - Local Markdown Reader",
-    template: "%s | mDocs",
+    default: "mDocks - Local Markdown Reader",
+    template: "%s | mDocks",
   },
   description:
-    "mDocs is a private, local-first Markdown reader for opening folders, files, and cloned GitHub repository docs in a polished browser viewer with table of contents and syntax highlighting.",
+    "mDocks is a private, local-first Markdown reader for opening folders, files, and cloned GitHub repository docs in a polished browser viewer with table of contents and syntax highlighting.",
   keywords: [
     "Markdown reader",
     "local Markdown viewer",
@@ -42,17 +42,17 @@ export const metadata: Metadata = {
     "MD file viewer",
     "Next.js Markdown app",
   ],
-  authors: [{ name: "mDocs" }],
-  creator: "mDocs",
-  publisher: "mDocs",
+  authors: [{ name: "mDocks" }],
+  creator: "mDocks",
+  publisher: "mDocks",
   alternates: {
     canonical: "/",
   },
   openGraph: {
     type: "website",
     url: "/",
-    siteName: "mDocs",
-    title: "mDocs - Local Markdown Reader",
+    siteName: "mDocks",
+    title: "mDocks - Local Markdown Reader",
     description:
       "Open local Markdown files and cloned GitHub repository docs in a clean, private, local-first viewer.",
     images: [
@@ -60,13 +60,13 @@ export const metadata: Metadata = {
         url: "/opengraph-image",
         width: 1200,
         height: 630,
-        alt: "mDocs local-first Markdown reader",
+        alt: "mDocks local-first Markdown reader",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "mDocs - Local Markdown Reader",
+    title: "mDocks - Local Markdown Reader",
     description:
       "A private, local-first Markdown reader for local files and GitHub repository docs.",
     images: ["/opengraph-image"],

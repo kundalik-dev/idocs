@@ -5,9 +5,9 @@ import { ArrowLeft, GitBranch, Mail, MessageSquareText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export const metadata: Metadata = {
-  title: "Contact mDocs",
+  title: "Contact mDocks",
   description:
-    "Contact information for mDocs questions, feedback, issues, and product suggestions.",
+    "Contact information for mDocks questions, feedback, issues, and product suggestions.",
   alternates: {
     canonical: "/contact-us",
   },
@@ -37,7 +37,7 @@ export default function ContactUsPage() {
               </h1>
             </div>
             <p className="mt-5 text-lg text-muted-foreground leading-relaxed">
-              Have feedback, a bug report, or a use case that mDocs should
+              Have feedback, a bug report, or a use case that mDocks should
               support better? Use the channels below.
             </p>
           </div>
@@ -55,9 +55,9 @@ export default function ContactUsPage() {
             </p>
             <a
               className="mt-4 inline-flex text-sm font-medium text-foreground hover:underline"
-              href="mailto:hello@mdocs.local"
+              href="mailto:hello@mdocks.local"
             >
-              hello@mdocs.local
+              hello@mdocks.local
             </a>
           </div>
           <div className="bg-background p-6">

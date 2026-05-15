@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import {
@@ -21,9 +21,9 @@ import { useViewerStore, type LocalServerSource } from "@/store/viewer-store";
 const GITHUB_RE =
   /^https:\/\/github\.com\/[\w.-]+\/[\w.-]+(\.git)?(\/.*)?$/i;
 
-const GLOBAL_SERVER_COMMAND = "mdocs start";
-const NPX_SERVER_COMMAND = "npx @iprep/mdocs start";
-const SERVER_COMMAND_PREF_KEY = "mdocs:server-command:v1";
+const GLOBAL_SERVER_COMMAND = "mdocks start";
+const NPX_SERVER_COMMAND = "npx @iprep/mdocks start";
+const SERVER_COMMAND_PREF_KEY = "mdocks:server-command:v1";
 
 type ServerCommandMode = "global" | "npx";
 

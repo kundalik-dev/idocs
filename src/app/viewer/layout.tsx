@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Viewer",
   description:
-    "Open and read local Markdown files and cloned GitHub repository docs privately in the mDocs browser viewer.",
+    "Open and read local Markdown files and cloned GitHub repository docs privately in the mDocks browser viewer.",
   alternates: {
     canonical: "/viewer",
   },

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import type { TocItem } from "@/lib/markdown";
+import { useViewerStore } from "@/store/viewer-store";
 
 type Props = {
   items: TocItem[];
@@ -14,6 +15,13 @@ type Props = {
  */
 export function Toc({ items }: Props) {
   const [activeId, setActiveId] = useState<string | null>(null);
+  const setTocOpen = useViewerStore((s) => s.setTocOpen);
+
+  const handleTocItemClick = () => {
+    if (window.matchMedia("(max-width: 767px)").matches) {
+      setTocOpen(false);
+    }
+  };
 
   useEffect(() => {
     if (items.length === 0) return;
@@ -59,6 +67,7 @@ export function Toc({ items }: Props) {
             <li key={it.id} style={{ paddingLeft: `${0.75 + indent * 0.875}rem` }}>
               <a
                 href={`#${it.id}`}
+                onClick={handleTocItemClick}
                 className={cn(
                   "block -ml-px border-l-2 border-transparent py-0.5 pl-3 transition-colors",
                   "text-muted-foreground hover:text-foreground",

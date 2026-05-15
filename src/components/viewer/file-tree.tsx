@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import {
   ChevronRight,
@@ -90,12 +90,21 @@ function buildTree(files: ViewerFile[]): TreeNode[] {
 function FileItem({ file }: { file: ViewerFile }) {
   const active = useViewerStore((s) => selectActiveFile(s)?.id === file.id);
   const setActiveFile = useViewerStore((s) => s.setActiveFile);
+  const setSidebarOpen = useViewerStore((s) => s.setSidebarOpen);
   const display = file.name.replace(/\.(md|markdown|mdx)$/i, "");
+
+  const handleClick = () => {
+    setActiveFile(file.id);
+    if (window.matchMedia("(max-width: 767px)").matches) {
+      setSidebarOpen(false);
+    }
+  };
 
   return (
     <button
       type="button"
-      onClick={() => setActiveFile(file.id)}
+      onClick={handleClick}
+      data-active-file={active ? file.id : undefined}
       className={cn(
         "group/file flex items-center gap-2 w-full text-left px-2 py-1.5 rounded-md text-sm",
         "transition-colors",

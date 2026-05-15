@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { create } from "zustand";
 import {
@@ -145,7 +145,7 @@ const DEMO_DOCS: Record<
   { sourceName: string; fileName: string; relPath: string; publicPath: string }
 > = {
   "mdocs-info": {
-    sourceName: "mDocs Demo",
+    sourceName: "mDocks Demo",
     fileName: "mdocs-info.md",
     relPath: "mdocs-info.md",
     publicPath: "/docs/mdocs-info.md",

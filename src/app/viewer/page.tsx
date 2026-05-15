@@ -1,8 +1,8 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { Suspense, useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowLeft,
   PanelLeftClose,
@@ -49,18 +49,37 @@ function ViewerPageContent() {
   const tocOpen = useViewerStore((s) => s.tocOpen);
   const toggleSidebar = useViewerStore((s) => s.toggleSidebar);
   const toggleToc = useViewerStore((s) => s.toggleToc);
+  const setSidebarOpen = useViewerStore((s) => s.setSidebarOpen);
+  const setTocOpen = useViewerStore((s) => s.setTocOpen);
   const hydrate = useViewerStore((s) => s.hydrate);
   const hydrated = useViewerStore((s) => s.hydrated);
   const openDemoDoc = useViewerStore((s) => s.openDemoDoc);
   const activeFile = useViewerStore(selectActiveFile);
   const sources = useViewerStore((s) => s.sources);
   const hasSources = sources.length > 0;
+  const [isMobileLayout, setIsMobileLayout] = useState<boolean | null>(null);
+  const collapsedMobileOnce = useRef(false);
 
   useKeyboardShortcuts();
 
   useEffect(() => {
     void hydrate();
   }, [hydrate]);
+
+  useEffect(() => {
+    const query = window.matchMedia("(max-width: 767px)");
+    const apply = () => setIsMobileLayout(query.matches);
+    apply();
+    query.addEventListener("change", apply);
+    return () => query.removeEventListener("change", apply);
+  }, []);
+
+  useEffect(() => {
+    if (!hydrated || !isMobileLayout || collapsedMobileOnce.current) return;
+    collapsedMobileOnce.current = true;
+    setSidebarOpen(false);
+    setTocOpen(false);
+  }, [hydrated, isMobileLayout, setSidebarOpen, setTocOpen]);
 
   useEffect(() => {
     if (!hydrated) return;
@@ -77,6 +96,13 @@ function ViewerPageContent() {
     [parsed],
   );
   const tocVisible = tocOpen && parsed && toc.length > 0;
+  const useMobileDrawers = isMobileLayout ?? true;
+  const mobileDrawersReady =
+    !useMobileDrawers ||
+    isMobileLayout === false ||
+    collapsedMobileOnce.current;
+  const sidebarVisible = sidebarOpen && mobileDrawersReady;
+  const tocDrawerVisible = tocVisible && mobileDrawersReady;
 
   return (
     <div className="fixed inset-0 flex flex-col overflow-hidden bg-background">
@@ -113,7 +139,7 @@ function ViewerPageContent() {
           <span className="inline-grid size-5 shrink-0 rounded bg-foreground text-background place-items-center text-[10px] font-bold">
             m
           </span>
-          <span>mDocs</span>
+          <span>mDocks</span>
         </Link>
 
         <div className="hidden md:flex items-center gap-2 text-sm text-muted-foreground ml-2 min-w-0 flex-1">
@@ -161,12 +187,22 @@ function ViewerPageContent() {
 
       {/* ---- Body ---- */}
       <div className="flex flex-1 min-h-0">
+        {useMobileDrawers && sidebarVisible ? (
+          <button
+            type="button"
+            aria-label="Close sidebar"
+            onClick={() => setSidebarOpen(false)}
+            className="fixed inset-x-0 bottom-0 top-14 z-30 bg-background/70 backdrop-blur-sm md:hidden"
+          />
+        ) : null}
+
         {/* Sidebar */}
         <aside
           className={cn(
-            "shrink-0 border-r border-sidebar-border bg-sidebar text-sidebar-foreground",
-            "transition-[width] duration-200 ease-out",
-            sidebarOpen ? "w-72" : "w-0",
+            "border-r border-sidebar-border bg-sidebar text-sidebar-foreground",
+            "fixed bottom-0 left-0 top-14 z-40 w-[min(18rem,calc(100vw-3rem))] shrink-0",
+            "transition-transform duration-200 ease-out md:relative md:top-auto md:z-auto md:w-auto md:transition-[width]",
+            sidebarVisible ? "translate-x-0 md:w-72" : "-translate-x-full md:w-0 md:translate-x-0",
             "overflow-hidden",
           )}
         >
@@ -235,18 +271,30 @@ function ViewerPageContent() {
           </div>
 
           {/* Right TOC rail (only when content + headings) */}
+          {useMobileDrawers && tocDrawerVisible ? (
+            <button
+              type="button"
+              aria-label="Close table of contents"
+              onClick={() => setTocOpen(false)}
+              className="fixed inset-x-0 bottom-0 top-14 z-30 bg-background/70 backdrop-blur-sm md:hidden"
+            />
+          ) : null}
           <aside
             aria-hidden={!tocVisible}
             className={cn(
-              "hidden xl:flex xl:flex-col shrink-0 overflow-x-hidden overflow-y-auto border-l thin-scrollbar",
-              "transition-[width,border-color] duration-200 ease-out",
-              tocVisible ? "w-64 border-border" : "w-0 border-transparent",
+              "fixed bottom-0 right-0 top-14 z-40 flex w-[min(16rem,calc(100vw-3rem))] shrink-0 flex-col overflow-x-hidden overflow-y-auto border-l bg-background thin-scrollbar",
+              "transition-transform duration-200 ease-out md:hidden",
+              tocDrawerVisible
+                ? "translate-x-0 border-border"
+                : "translate-x-full border-transparent",
+              "xl:relative xl:top-auto xl:z-auto xl:flex xl:transition-[width,border-color]",
+              tocVisible ? "xl:w-64" : "xl:w-0",
             )}
           >
             <div
               className={cn(
                 "w-64 p-6 transition-[opacity,transform] duration-200 ease-out",
-                tocVisible
+                tocDrawerVisible
                   ? "translate-x-0 opacity-100"
                   : "pointer-events-none translate-x-4 opacity-0",
               )}

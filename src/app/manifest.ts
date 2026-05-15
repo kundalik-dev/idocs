@@ -4,8 +4,8 @@ export const dynamic = "force-static";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "mDocs - Local Markdown Reader",
-    short_name: "mDocs",
+    name: "mDocks - Local Markdown Reader",
+    short_name: "mDocks",
     description:
       "A private, local-first Markdown reader for opening folders and files directly in your browser.",
     start_url: "/",

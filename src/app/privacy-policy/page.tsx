@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 export const metadata: Metadata = {
   title: "Privacy Policy",
   description:
-    "Privacy policy for mDocs, a local-first Markdown reader for browser files and localhost GitHub repository browsing.",
+    "Privacy policy for mDocks, a local-first Markdown reader for browser files and localhost GitHub repository browsing.",
   alternates: {
     canonical: "/privacy-policy",
   },
@@ -37,7 +37,7 @@ export default function PrivacyPolicyPage() {
               </h1>
             </div>
             <p className="mt-5 text-lg text-muted-foreground leading-relaxed">
-              mDocs is built as a local-first reader. This page explains what
+              mDocks is built as a local-first reader. This page explains what
               stays on your machine and what the app stores locally.
             </p>
             <p className="mt-4 text-sm text-muted-foreground">
@@ -53,7 +53,7 @@ export default function PrivacyPolicyPage() {
             <FileLock2 className="size-5 text-muted-foreground" />
             <h2 className="mt-4 font-semibold">No document uploads</h2>
             <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-              Files opened through the browser are read on your device. mDocs
+              Files opened through the browser are read on your device. mDocks
               does not upload selected documents to an external service.
             </p>
           </div>
@@ -78,10 +78,10 @@ export default function PrivacyPolicyPage() {
         <div className="mt-12 max-w-3xl space-y-8">
           <section>
             <h2 className="text-xl font-semibold tracking-tight">
-              Information mDocs handles
+              Information mDocks handles
             </h2>
             <p className="mt-3 text-muted-foreground leading-relaxed">
-              mDocs handles Markdown file content only so it can render the
+              mDocks handles Markdown file content only so it can render the
               document in the viewer. When you choose folders or files, browser
               permissions control access. When you use local server mode, the
               server reads cloned repository files from your machine.
@@ -92,7 +92,7 @@ export default function PrivacyPolicyPage() {
               What is stored locally
             </h2>
             <p className="mt-3 text-muted-foreground leading-relaxed">
-              mDocs uses local browser storage for remembered sources, the last
+              mDocks uses local browser storage for remembered sources, the last
               active file, sidebar and table-of-contents settings, and the last
               local server URL. Clearing browser storage removes this data.
             </p>

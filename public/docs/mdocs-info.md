@@ -1,38 +1,38 @@
 ---
-title: mDocs Demo Guide
-description: A guided tour of mDocs features, workflows, and practical use cases
+title: mDocks Demo Guide
+description: A guided tour of mDocks features, workflows, and practical use cases
 date: 2026-05-14
-tags: [mDocs, markdown, local-first, demo]
+tags: [mDocks, markdown, local-first, demo]
 ---
 
-# mDocs Demo Guide
+# mDocks Demo Guide
 
-mDocs is a **local-first Markdown reader** for people who keep notes, docs, specs, runbooks, and repository documentation in plain text.
+mDocks is a **local-first Markdown reader** for people who keep notes, docs, specs, runbooks, and repository documentation in plain text.
 
 It opens Markdown from your machine or from GitHub repositories cloned through a small local server. The goal is simple: read technical documents in a polished viewer without uploading private files anywhere.
 
 > Documents stay on your machine. Browser-picked files are read locally, and the optional server binds to `127.0.0.1`.
 
-## What mDocs is for
+## What mDocks is for
 
-mDocs is useful when your Markdown files are scattered across folders, projects, and repositories, but you want one calm place to read them.
+mDocks is useful when your Markdown files are scattered across folders, projects, and repositories, but you want one calm place to read them.
 
 Common use cases:
 
-| Use case              | How mDocs helps                                                                          |
+| Use case              | How mDocks helps                                                                         |
 | --------------------- | ---------------------------------------------------------------------------------------- |
 | Personal notes        | Open a notes folder and browse every `.md` file in one file tree.                        |
 | Project documentation | Read `README.md`, architecture notes, and implementation plans with syntax highlighting. |
 | GitHub repo docs      | Run the local server, clone a public repo, and browse its Markdown files in the viewer.  |
 | Developer handbooks   | Keep onboarding guides, checklists, and runbooks readable without a hosted docs site.    |
 | Offline reading       | Reopen remembered local sources and keep reading without a network connection.           |
-| Writing review        | Edit Markdown in your editor and see local file changes refresh in mDocs.                |
+| Writing review        | Edit Markdown in your editor and see local file changes refresh in mDocks.               |
 
 ## The recommended flow
 
 Start with the simplest path: open local files directly in the browser.
 
-1. Open the mDocs viewer.
+1. Open the mDocks viewer.
 2. Choose **Open folder** if your docs live inside one project or notes directory.
 3. Choose **Open files** if you only want to read a few Markdown files.
 4. Select a file from the sidebar.
@@ -41,7 +41,7 @@ Start with the simplest path: open local files directly in the browser.
 For GitHub repositories, use the optional local server:
 
 ```bash
-npx mdocs serve
+npx @iprep/mdocks start
 ```
 
 Then return to the viewer, wait for the server panel to show as connected, paste a GitHub repository URL, and add the repo to your library.
@@ -63,10 +63,10 @@ This mode requires a Chromium browser such as Chrome, Edge, Brave, or Arc.
 
 Use this mode when you want to read documentation from a GitHub repository.
 
-- Start the server with `npx mdocs serve`.
-- The viewer connects to `http://127.0.0.1:4873`.
+- Start the server with `npx @iprep/mdocks start`.
+- The viewer connects to `http://127.0.0.1:5540`.
 - Paste a GitHub URL and optional branch.
-- mDocs clones the repo locally and adds its Markdown files to the sidebar.
+- mDocks clones the repo locally and adds its Markdown files to the sidebar.
 
 The server is local. It is there to do things a browser cannot safely do by itself, such as cloning repositories.
 
@@ -107,21 +107,21 @@ my-app/
     release-plan.md
 ```
 
-In mDocs:
+In mDocks:
 
 1. Click **Open folder**.
 2. Pick `my-app`.
 3. Open `README.md` from the sidebar.
 4. Use the table of contents to jump between sections.
 5. Edit `docs/api.md` in your editor.
-6. Return to mDocs and continue reading after the content refreshes.
+6. Return to mDocks and continue reading after the content refreshes.
 
 ## Example workflow: GitHub documentation
 
 When the docs live in a repository:
 
 1. Start the local server.
-2. Open the server panel in mDocs.
+2. Open the server panel in mDocks.
 3. Paste a repository URL, for example:
 
 ```text
@@ -134,7 +134,7 @@ https://github.com/owner/repo
 
 ## Privacy model
 
-mDocs is intentionally local-first.
+mDocks is intentionally local-first.
 
 - It does not upload your selected files.
 - It does not require an account.
@@ -160,7 +160,7 @@ That means you can use it to confirm the reading layout, table of contents, meta
 
 ## Quick checklist
 
-Use this checklist the first time you try mDocs:
+Use this checklist the first time you try mDocks:
 
 - [ ] Open the viewer.
 - [ ] Pick a local folder with Markdown files.
@@ -168,8 +168,8 @@ Use this checklist the first time you try mDocs:
 - [ ] Toggle the table of contents by opening a document with headings.
 - [ ] Copy a code block.
 - [ ] Change the theme.
-- [ ] Run `npx mdocs serve` if you want to add GitHub repositories.
+- [ ] Run `npx @iprep/mdocks start` if you want to add GitHub repositories.
 
 ## Final note
 
-mDocs is not trying to replace your editor, Git workflow, or documentation site. It gives Markdown files a focused reading surface while keeping your source files exactly where they already live.
+mDocks is not trying to replace your editor, Git workflow, or documentation site. It gives Markdown files a focused reading surface while keeping your source files exactly where they already live.

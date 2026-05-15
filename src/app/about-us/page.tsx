@@ -13,9 +13,9 @@ import {
 import { Button } from "@/components/ui/button";
 
 export const metadata: Metadata = {
-  title: "About mDocs",
+  title: "About mDocks",
   description:
-    "Learn why mDocs exists and how it helps you read local Markdown files and GitHub repository documentation privately.",
+    "Learn why mDocks exists and how it helps you read local Markdown files and GitHub repository documentation privately.",
   alternates: {
     canonical: "/about-us",
   },
@@ -25,7 +25,7 @@ const principles = [
   {
     icon: LockKeyhole,
     title: "Local-first",
-    body: "mDocs is designed around files that already live on your machine. The reader avoids uploads and keeps document access close to your filesystem.",
+    body: "mDocks is designed around files that already live on your machine. The reader avoids uploads and keeps document access close to your filesystem.",
   },
   {
     icon: FolderOpen,
@@ -48,7 +48,7 @@ const reasons = [
   {
     icon: Code2,
     title: "Technical docs need structure",
-    body: "mDocs turns headings into a table of contents, highlights code blocks, and keeps frontmatter visible without changing the source file.",
+    body: "mDocks turns headings into a table of contents, highlights code blocks, and keeps frontmatter visible without changing the source file.",
   },
   {
     icon: GitBranch,
@@ -77,11 +77,11 @@ export default function AboutUsPage() {
                 <BookOpen className="size-5 md:size-6" />
               </div>
               <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
-                About mDocs
+                About mDocks
               </h1>
             </div>
             <p className="mt-5 text-lg text-muted-foreground leading-relaxed">
-              mDocs is a private Markdown reader for people who keep important
+              mDocks is a private Markdown reader for people who keep important
               notes, project documentation, runbooks, and repository docs in
               plain text.
             </p>
@@ -98,7 +98,7 @@ export default function AboutUsPage() {
             Markdown is simple. Reading a full docs library should be too.
           </h2>
           <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-            mDocs adds a focused reading layer around the Markdown files and
+            mDocks adds a focused reading layer around the Markdown files and
             repositories you already maintain.
           </p>
         </div>

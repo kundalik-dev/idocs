@@ -2,7 +2,7 @@ import { ImageResponse } from "next/og";
 
 export const dynamic = "force-static";
 export const alt =
-  "mDocs local-first Markdown reader for private files and GitHub repo docs";
+  "mDocks local-first Markdown reader for private files and GitHub repo docs";
 export const size = {
   width: 1200,
   height: 630,
@@ -57,7 +57,7 @@ export default function Image() {
                 gap: "4px",
               }}
             >
-              <div style={{ fontSize: "42px", fontWeight: 800 }}>mDocs</div>
+              <div style={{ fontSize: "42px", fontWeight: 800 }}>mDocks</div>
               <div style={{ color: "#475569", fontSize: "24px" }}>
                 Local Markdown reader
               </div>
