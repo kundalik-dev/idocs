@@ -293,33 +293,29 @@ export default function Home() {
                   </div>
                 </div>
                 <div className="mt-auto space-y-3">
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                    Start the server
-                  </p>
-                  <div className="rounded-xl border border-border bg-background/70 p-2.5 shadow-sm">
-                    <p className="px-1 pb-2 text-[11px] font-medium text-muted-foreground">
-                      Install once, then start with the short command.
-                    </p>
-                    <CopyCommand
-                      label="Install package"
-                      command="npm i @iprep/mdocs"
-                      className="w-full"
-                    />
-                    <CopyCommand
-                      label="Start server"
-                      command="mdocs start"
-                      className="mt-2 w-full"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <p className="text-[11px] font-medium text-muted-foreground">
-                      Prefer no install?
-                    </p>
-                    <CopyCommand
-                      label="No install"
-                      command="npx @iprep/mdocs start"
-                      className="w-full"
-                    />
+                  <div className="space-y-3 rounded-xl border border-border bg-background/70 p-2.5 shadow-sm">
+                    <div>
+                      <p className="px-1 pb-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                        Install once
+                      </p>
+                      <CopyCommand
+                        command="npm i @iprep/mdocs"
+                        className="w-full"
+                      />
+                      <CopyCommand
+                        command="mdocs start"
+                        className="mt-2 w-full"
+                      />
+                    </div>
+                    <div className="border-t border-border pt-3">
+                      <p className="px-1 pb-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                        Direct run
+                      </p>
+                      <CopyCommand
+                        command="npx @iprep/mdocs start"
+                        className="w-full"
+                      />
+                    </div>
                   </div>
                   <ul className="text-sm text-muted-foreground space-y-1.5 pt-1">
                     <li className="flex items-center gap-2">

@@ -7,7 +7,7 @@ Read this file first when you are the next AI assistant working on this repo.
 This project is **mDocs**, a local-first Markdown reader and GitHub repo browser. It has two modes:
 
 1. **Browser files** — open local folders/files via the File System Access API (no install needed, Chromium only)
-2. **Local server** — connect to `npx mdocs serve` running on `127.0.0.1:4873` to clone and browse GitHub repos
+2. **Local server** — connect to `npx @iprep/mdocs serve` running on `127.0.0.1:4873` to clone and browse GitHub repos
 
 Documents never leave the machine. No uploads, no backend persistence.
 
