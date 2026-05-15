@@ -1,18 +1,18 @@
-# mdocks
+# mDocks
 
 **Private Markdown browsing for local files and GitHub repo docs.**
 
-mdocks is a local-first Markdown reader for developers who keep notes, specs, runbooks, and repository documentation in plain text. Open local folders, select individual Markdown files, or browse GitHub repository docs through a small local server without uploading your documents anywhere.
+mDocks is a local-first Markdown reader for developers who keep notes, specs, runbooks, and repository documentation in plain text. Open local folders, select individual Markdown files, or browse GitHub repository docs through a small local server without uploading your documents anywhere.
 
 Documents stay on your machine. Browser file handles are stored locally in IndexedDB, and server-backed repository content is fetched from `127.0.0.1`.
 
-## Why mdocks?
+## Why mDocks?
 
-Markdown is great for writing documentation, but reading large Markdown folders and repo docs can feel scattered across editors, file explorers, and browser tabs. mdocks gives those files a focused reading surface while keeping the source files exactly where they already live.
+Markdown is great for writing documentation, but reading large Markdown folders and repo docs can feel scattered across editors, file explorers, and browser tabs. mDocks gives those files a focused reading surface while keeping the source files exactly where they already live.
 
 - **Local-first by design**: no account, no cloud workspace, no document uploads.
 - **Open local docs fast**: pick a folder or individual Markdown files in a Chromium browser.
-- **Browse GitHub repo docs locally**: run the mdocks server, clone a public repo, and read its Markdown files in the viewer.
+- **Browse GitHub repo docs locally**: run the mDocks server, clone a public repo, and read its Markdown files in the viewer.
 - **Read technical docs comfortably**: table of contents, frontmatter cards, GitHub-flavored Markdown, and Shiki-powered code highlighting.
 - **Stay close to your workflow**: edit in your usual editor and refresh local files while reading.
 
@@ -39,7 +39,7 @@ http://localhost:3000/viewer?blog=mdocks-info
 
 ## Browse GitHub Repos
 
-Browser file access is enough for local folders and files. To clone and browse GitHub repository docs, start the local mdocks server:
+Browser file access is enough for local folders and files. To clone and browse GitHub repository docs, start the local mDocks server:
 
 ```bash
 npx @iprep/mdocks start
@@ -70,18 +70,18 @@ After the server is connected, paste a GitHub repository URL in the server panel
 
 ## Use Cases
 
-| Use case | How mdocks helps |
+| Use case | How mDocks helps |
 | --- | --- |
 | Local notes | Open a notes folder and browse Markdown files in one file tree. |
 | Project docs | Read `README.md`, architecture notes, API docs, and runbooks in a focused viewer. |
 | GitHub repo docs | Clone a public repository through the local server and browse its Markdown files. |
 | Open-source projects | Give contributors a cleaner way to inspect docs-heavy repositories. |
 | Private team docs | Read internal Markdown docs without moving them into another hosted platform. |
-| Writing review | Edit Markdown in your editor and review rendered output in mdocks. |
+| Writing review | Edit Markdown in your editor and review rendered output in mDocks. |
 
 ## Privacy Model
 
-mdocks is intentionally local-first.
+mDocks is intentionally local-first.
 
 - Selected local files are read through the browser File System Access API.
 - Browser file handles are remembered in IndexedDB on your device.
@@ -200,14 +200,14 @@ Each post should include frontmatter:
 
 ```md
 ---
-title: "Why mdocks is local-first"
-description: "How mdocks helps you read Markdown docs without uploading files."
+title: "Why mDocks is local-first"
+description: "How mDocks helps you read Markdown docs without uploading files."
 date: "2026-05-15"
-author: "mdocks"
+author: "mDocks"
 tags: ["markdown", "local-first", "developer-tools"]
 ---
 
-# Why mdocks is local-first
+# Why mDocks is local-first
 ```
 
 Add every public post to `public/blogs/index.json`. The UI sorts posts newest first by `date`, and each card links to `/viewer?blog=<slug>`.

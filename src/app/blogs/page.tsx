@@ -1,36 +1,20 @@
-import { readFile } from "node:fs/promises";
-import path from "node:path";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { ArrowRight, CalendarDays, Tag } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-  normalizeBlogManifest,
-  type BlogPostManifestItem,
-} from "@/lib/blogs";
+import { buttonVariants } from "@/components/ui/button";
+import { getBlogPosts } from "@/lib/blogs-server";
+import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "Blog",
   description:
-    "Read mdocks blog posts about local-first Markdown, private docs, and GitHub repo documentation workflows.",
+    "Read mDocks blog posts about local-first Markdown, private docs, and GitHub repo documentation workflows.",
   alternates: {
     canonical: "/blogs",
   },
 };
-
-async function getBlogPosts(): Promise<BlogPostManifestItem[]> {
-  try {
-    const file = await readFile(
-      path.join(process.cwd(), "public", "blogs", "index.json"),
-      "utf8",
-    );
-    return normalizeBlogManifest(JSON.parse(file));
-  } catch {
-    return [];
-  }
-}
 
 function formatDate(date: string): string {
   const parsed = new Date(date);
@@ -57,14 +41,14 @@ export default async function BlogsPage() {
               <span className="inline-grid size-5 shrink-0 place-items-center rounded bg-foreground text-[10px] font-bold text-background">
                 m
               </span>
-              mdocks
+              mDocks
             </Link>
             <h1 className="mt-8 text-4xl font-bold tracking-tight md:text-5xl">
               Blog
             </h1>
             <p className="mt-4 max-w-2xl text-lg leading-relaxed text-muted-foreground">
               Notes on local-first Markdown reading, private documentation, and
-              browsing GitHub repo docs inside mdocks.
+              browsing GitHub repo docs inside mDocks.
             </p>
           </div>
         </div>
@@ -113,16 +97,23 @@ export default async function BlogsPage() {
                     ))}
                   </div>
                 ) : null}
-                <Button
-                  className="mt-5"
-                  variant="outline"
-                  size="sm"
-                  nativeButton={false}
-                  render={<Link href={`/viewer?blog=${post.slug}`} />}
-                >
-                  Read in viewer
-                  <ArrowRight className="size-3.5" />
-                </Button>
+                <div className="mt-5 flex flex-wrap gap-2">
+                  <Link
+                    href={`/blogs/${post.slug}`}
+                    className={cn(buttonVariants({ size: "sm" }))}
+                  >
+                    Read article
+                    <ArrowRight className="size-3.5" />
+                  </Link>
+                  <Link
+                    href={`/viewer?blog=${post.slug}`}
+                    className={cn(
+                      buttonVariants({ variant: "outline", size: "sm" }),
+                    )}
+                  >
+                    Open in viewer
+                  </Link>
+                </div>
               </article>
             ))}
           </div>
@@ -139,7 +130,7 @@ export default async function BlogsPage() {
               <span className="inline-grid size-6 shrink-0 place-items-center rounded-md bg-foreground text-xs font-bold text-background">
                 m
               </span>
-              <span>mdocks</span>
+              <span>mDocks</span>
             </Link>
             <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
               A local-first Markdown reader for folders, files, blog posts, and
@@ -151,7 +142,7 @@ export default async function BlogsPage() {
             <h2 className="text-sm font-semibold">Product</h2>
             <nav className="mt-4 flex flex-col gap-2 text-sm text-muted-foreground">
               <Link href="/viewer" className="hover:text-foreground">
-                Open mdocks
+                Open mDocks
               </Link>
               <Link
                 href="/viewer?blog=mdocks-info"
@@ -181,7 +172,7 @@ export default async function BlogsPage() {
           </div>
         </div>
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6 text-xs text-muted-foreground">
-          <span>mdocks</span>
+          <span>mDocks</span>
           <span>Built with Next.js, React, Tailwind, and shadcn/ui</span>
         </div>
       </footer>

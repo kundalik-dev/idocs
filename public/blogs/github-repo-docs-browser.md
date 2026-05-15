@@ -1,22 +1,22 @@
 ---
 title: "GitHub Repo Docs Browser"
-description: "Use mdocks to browse Markdown documentation from GitHub repositories through a local server."
+description: "Use mDocks to browse Markdown documentation from GitHub repositories through a local server."
 date: "2026-05-18"
-author: "mdocks"
+author: "mDocks"
 tags: ["github", "documentation", "developer-tools"]
 ---
 
 # GitHub Repo Docs Browser
 
-Many GitHub repositories have useful documentation spread across `README.md`, `docs/`, examples, changelogs, and implementation notes. mdocks helps you browse those Markdown files in one reader.
+Many GitHub repositories have useful documentation spread across `README.md`, `docs/`, examples, changelogs, and implementation notes. mDocks helps you browse those Markdown files in one reader.
 
 ## Why browse repo docs locally?
 
-GitHub is excellent for source control, but reading documentation across a large repository can involve a lot of tab switching. mdocks creates a focused view for Markdown files while keeping the repository local.
+GitHub is excellent for source control, but reading documentation across a large repository can involve a lot of tab switching. mDocks creates a focused view for Markdown files while keeping the repository local.
 
 ## How it works
 
-Start the mdocks local server:
+Start the mDocks local server:
 
 ```bash
 npx @iprep/mdocks start
@@ -51,4 +51,3 @@ This workflow is useful for:
 ## Local-first by design
 
 The local server exists because browsers cannot safely clone repositories by themselves. The server binds to your own machine, and cloned repositories stay local.
-

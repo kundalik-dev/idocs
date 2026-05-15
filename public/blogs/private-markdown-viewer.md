@@ -2,19 +2,19 @@
 title: "Private Markdown Viewer"
 description: "A private way to read Markdown files, folders, and repo docs without moving documents into a hosted workspace."
 date: "2026-05-17"
-author: "mdocks"
+author: "mDocks"
 tags: ["privacy", "markdown", "local-first"]
 ---
 
 # Private Markdown Viewer
 
-Private documentation should not need to leave your machine just to become readable. mdocks is built for Markdown files that already live in local folders or local repository clones.
+Private documentation should not need to leave your machine just to become readable. mDocks is built for Markdown files that already live in local folders or local repository clones.
 
 ## The problem with hosted readers
 
 Hosted documentation tools are useful for publishing, collaboration, and team portals. But they can be too much when you simply want to read private Markdown files. Uploading notes, specs, runbooks, or internal docs can add unnecessary friction and privacy concerns.
 
-mdocks focuses on reading, not hosting.
+mDocks focuses on reading, not hosting.
 
 ## What stays local
 
@@ -23,7 +23,7 @@ mdocks focuses on reading, not hosting.
 - The optional repository server runs on `127.0.0.1`.
 - Cloned repositories stay on your computer.
 
-## What mdocks is good for
+## What mDocks is good for
 
 Use it for:
 
@@ -34,11 +34,10 @@ Use it for:
 - Markdown folders you do not want to upload
 - Repository documentation you want to browse locally
 
-## What mdocks is not
+## What mDocks is not
 
-mdocks is not trying to replace your editor, Git workflow, or public documentation site. It gives Markdown files a calmer reading interface while keeping your source documents where they already live.
+mDocks is not trying to replace your editor, Git workflow, or public documentation site. It gives Markdown files a calmer reading interface while keeping your source documents where they already live.
 
 ## Simple privacy promise
 
-If you open a local Markdown folder in mdocks, the viewer reads it locally. That is the point: private Markdown reading without a cloud workspace.
-
+If you open a local Markdown folder in mDocks, the viewer reads it locally. That is the point: private Markdown reading without a cloud workspace.

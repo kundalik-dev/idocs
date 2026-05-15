@@ -148,7 +148,7 @@ function normalizeServerUrl(url: string | null): string {
 }
 
 const BLOG_SOURCE_ID = "blog-mdocks";
-const BLOG_SOURCE_NAME = "mdocks Blog";
+const BLOG_SOURCE_NAME = "mDocks Blog";
 
 const flatten = (sources: ViewerSource[]): ViewerFile[] =>
   sources.flatMap((s) => s.files as ViewerFile[]);
