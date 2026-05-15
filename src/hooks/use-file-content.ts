@@ -36,15 +36,15 @@ export function useFileContent(file: ViewerFile | null): FileContentState {
   useEffect(() => {
     if (!file) return;
 
-    if (file.sourceType === "demo-doc") {
+    if (file.sourceType === "blog-doc") {
       let cancelled = false;
-      const loadDemoDoc = async () => {
+      const loadBlogDoc = async () => {
         setLoading(true);
         setError(null);
         try {
           const response = await fetch(file.publicPath);
           if (!response.ok) {
-            throw new Error(`Demo document not found (${response.status})`);
+            throw new Error(`Blog post not found (${response.status})`);
           }
           const content = await response.text();
           if (cancelled) return;
@@ -58,7 +58,7 @@ export function useFileContent(file: ViewerFile | null): FileContentState {
         }
       };
 
-      void loadDemoDoc();
+      void loadBlogDoc();
 
       return () => {
         cancelled = true;

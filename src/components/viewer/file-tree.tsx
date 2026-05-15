@@ -51,7 +51,7 @@ type FolderNode = {
 type FileNode = { type: "file"; file: ViewerFile };
 type TreeNode = FolderNode | FileNode;
 
-function buildTree(files: ViewerFile[]): TreeNode[] {
+function buildTree(files: ViewerFile[], preserveRootFileOrder = false): TreeNode[] {
   const root: TreeNode[] = [];
   for (const f of files) {
     let level = root;
@@ -73,6 +73,9 @@ function buildTree(files: ViewerFile[]): TreeNode[] {
   }
 
   const sortLevel = (nodes: TreeNode[]) => {
+    if (preserveRootFileOrder && nodes.every((node) => node.type === "file")) {
+      return;
+    }
     nodes.sort((a, b) => {
       if (a.type !== b.type) return a.type === "folder" ? -1 : 1;
       const an = a.type === "folder" ? a.name : a.file.name;
@@ -186,16 +189,19 @@ function SourceCard({ source }: { source: ViewerSource }) {
   const [collapseSignal, setCollapseSignal] = useState<CollapseSignal>({ gen: 0, open: true });
 
   const isServer = source.kind === "local-server";
-  const isDemo = source.kind === "demo";
+  const isBlog = source.kind === "blog";
   const syncing = isServer && (source as LocalServerSource).syncing;
-  const refreshing = isServer ? syncing : !isDemo && browserRefreshing;
+  const refreshing = isServer ? syncing : !isBlog && browserRefreshing;
 
   const hasFolders = useMemo(
     () => source.files.some((f) => f.dirSegments.length > 0),
     [source.files]
   );
 
-  const tree = useMemo(() => buildTree(source.files), [source.files]);
+  const tree = useMemo(
+    () => buildTree(source.files, source.kind === "blog"),
+    [source.files, source.kind],
+  );
 
   const onToggleCollapse = () => {
     const next = !allOpen;
@@ -211,8 +217,8 @@ function SourceCard({ source }: { source: ViewerSource }) {
       } catch (e) {
         toast.error(`Sync failed: ${(e as Error).message}`);
       }
-    } else if (isDemo) {
-      toast.info("The demo document refreshes when the page reloads.");
+    } else if (isBlog) {
+      toast.info("Blog posts refresh when the page reloads.");
     } else {
       setBrowserRefreshing(true);
       try {
@@ -228,7 +234,7 @@ function SourceCard({ source }: { source: ViewerSource }) {
 
   const needsPermission =
     !isServer &&
-    !isDemo &&
+    !isBlog &&
     (source.permission === "prompt" || source.permission === "denied");
 
   return (
@@ -239,7 +245,7 @@ function SourceCard({ source }: { source: ViewerSource }) {
             <Folder className="size-3.5 text-muted-foreground" />
           ) : source.kind === "files" ? (
             <Files className="size-3.5 text-muted-foreground" />
-          ) : source.kind === "demo" ? (
+          ) : source.kind === "blog" ? (
             <BookOpen className="size-3.5 text-muted-foreground" />
           ) : (
             <Globe className="size-3.5 text-muted-foreground" />
@@ -271,7 +277,7 @@ function SourceCard({ source }: { source: ViewerSource }) {
           </Button>
         )}
 
-        {!isDemo && (
+        {!isBlog && (
           <Button
             variant="ghost"
             size="icon-xs"
@@ -300,7 +306,7 @@ function SourceCard({ source }: { source: ViewerSource }) {
             <MoreHorizontal className="size-3" />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            {!isDemo && (
+            {!isBlog && (
               <>
                 <DropdownMenuItem onClick={onRefresh}>
                   <RefreshCw className="size-3.5" />{" "}

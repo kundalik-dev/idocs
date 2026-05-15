@@ -117,7 +117,7 @@ export default function Home() {
             <span className="inline-grid size-6 shrink-0 rounded-md bg-foreground text-background place-items-center text-xs font-bold">
               m
             </span>
-            <span>mDocks</span>
+            <span>mdocks</span>
           </Link>
           <div className="flex items-center gap-2">
             <ThemeToggle />
@@ -127,7 +127,7 @@ export default function Home() {
               nativeButton={false}
               render={<Link href="/viewer" />}
             >
-              Open mDocks
+              Open mdocks
               <ArrowRight className="size-4" />
             </Button>
           </div>
@@ -148,7 +148,7 @@ export default function Home() {
               <span className="text-muted-foreground">read beautifully.</span>
             </h1>
             <p className="mt-6 text-lg md:text-xl text-muted-foreground leading-relaxed max-w-2xl">
-              mDocks opens folders, individual{" "}
+              mdocks opens folders, individual{" "}
               <code className="font-mono text-sm px-1.5 py-0.5 rounded bg-muted border border-border">
                 .md
               </code>{" "}
@@ -161,16 +161,16 @@ export default function Home() {
                 nativeButton={false}
                 render={<Link href="/viewer" />}
               >
-                Open mDocks
+                Open mdocks
                 <ArrowRight className="size-4" />
               </Button>
               <Button
                 size="lg"
                 variant="outline"
                 nativeButton={false}
-                render={<Link href="/viewer?demo=mdocs-info" />}
+                render={<Link href="/viewer?blog=mdocks-info" />}
               >
-                View demo in mDocks
+                Read blog in mdocks
                 <BookOpen className="size-4" />
               </Button>
             </div>
@@ -211,7 +211,7 @@ export default function Home() {
                     {[
                       {
                         step: "01",
-                        title: "Open mDocks",
+                        title: "Open mdocks",
                         body: "Launch the reader in your browser.",
                       },
                       {
@@ -283,7 +283,7 @@ export default function Home() {
                       Local server + GitHub repos
                     </h3>
                     <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-                      Run the mDocks server locally, then clone public GitHub
+                      Run the mdocks server locally, then clone public GitHub
                       repos from the viewer. It binds to{" "}
                       <code className="font-mono text-xs px-1 py-0.5 rounded bg-muted border border-border">
                         127.0.0.1:5540
@@ -366,7 +366,7 @@ export default function Home() {
             Nothing leaves your machine.
           </h2>
           <p className="mt-4 text-muted-foreground leading-relaxed">
-            mDocks reads files via the File System Access API and a local server
+            mdocks reads files via the File System Access API and a local server
             that binds to{" "}
             <code className="font-mono text-sm px-1.5 py-0.5 rounded bg-muted border border-border">
               127.0.0.1
@@ -380,7 +380,7 @@ export default function Home() {
               nativeButton={false}
               render={<Link href="/viewer" />}
             >
-              Open mDocks
+              Open mdocks
               <ArrowRight className="size-4" />
             </Button>
             <CopyCommand command="npx @iprep/mdocks start" />
@@ -400,7 +400,7 @@ export default function Home() {
                 <span className="inline-grid size-6 shrink-0 rounded-md bg-foreground text-background place-items-center text-xs font-bold">
                   m
                 </span>
-                <span>mDocks</span>
+                <span>mdocks</span>
               </Link>
               <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
                 A local-first Markdown reader for folders, files, and cloned
@@ -413,16 +413,19 @@ export default function Home() {
               <h2 className="text-sm font-semibold">Product</h2>
               <nav className="mt-4 flex flex-col gap-2 text-sm text-muted-foreground">
                 <Link href="/viewer" className="hover:text-foreground">
-                  Open mDocks
+                  Open mdocks
                 </Link>
                 <Link
-                  href="/viewer?demo=mdocs-info"
+                  href="/viewer?blog=mdocks-info"
                   className="hover:text-foreground"
                 >
-                  Demo guide
+                  Blog guide
                 </Link>
-                <a href="/docs/mdocs-info.md" className="hover:text-foreground">
-                  Raw Markdown demo
+                <Link href="/blogs" className="hover:text-foreground">
+                  Blog
+                </Link>
+                <a href="/blogs/mdocks-info.md" className="hover:text-foreground">
+                  Raw Markdown guide
                 </a>
               </nav>
             </div>
@@ -444,7 +447,7 @@ export default function Home() {
           </div>
         </div>
         <div className="max-w-6xl mx-auto px-6 py-6 text-xs text-muted-foreground flex items-center justify-between">
-          <span>mDocks</span>
+          <span>mdocks</span>
           <span>
             Built with Next.js &middot; React &middot; Tailwind &middot;
             shadcn/ui

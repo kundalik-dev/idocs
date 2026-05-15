@@ -21,6 +21,11 @@ const routes = [
     priority: 0.8,
   },
   {
+    path: "/blogs",
+    changeFrequency: "weekly",
+    priority: 0.7,
+  },
+  {
     path: "/privacy-policy",
     changeFrequency: "yearly",
     priority: 0.5,
